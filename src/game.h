@@ -1,9 +1,9 @@
 #pragma once
 
-class Ball
+class Game
 {
 public:
-    Ball();
+    Game();
     void Update();
     void Draw();
 

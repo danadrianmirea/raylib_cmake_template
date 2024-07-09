@@ -1,7 +1,7 @@
-#include "ball.h"
+#include "game.h"
 #include <raylib.h>
 
-Ball::Ball()
+Game::Game()
 {
     x = 100;
     y = 100;
@@ -10,7 +10,7 @@ Ball::Ball()
     radius = 15;
 }
 
-void Ball::Update()
+void Game::Update()
 {
     x += speedX;
     y += speedY;
@@ -22,7 +22,7 @@ void Ball::Update()
         speedY *= -1;
 }
 
-void Ball::Draw()
+void Game::Draw()
 {
     DrawCircle(x, y, radius, WHITE);
 }

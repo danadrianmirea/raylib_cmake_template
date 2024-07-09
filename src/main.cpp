@@ -1,24 +1,22 @@
 #include <raylib.h>
-#include "ball.h"
+#include "game.h"
+#include "globals.h"
 
 int main()
 {
-    Color darkGreen = Color{20, 160, 133, 255};
 
-    const int screenWidth = 800;
-    const int screenHeight = 600;
+    Game game = Game();
 
-    Ball ball = Ball();
-
-    InitWindow(screenWidth, screenHeight, "My first RAYLIB program!");
+    InitWindow(screenWidth, screenHeight, "Adrian's raylib template");
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
+        // TODO add render to texture, minimal starter UI
         BeginDrawing();
         ClearBackground(darkGreen);
-        ball.Update();
-        ball.Draw();
+        game.Update();
+        game.Draw();
         EndDrawing();
     }
 
