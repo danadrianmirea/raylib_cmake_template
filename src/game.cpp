@@ -25,6 +25,11 @@ Game::~Game()
 void Game::InitGame()
 {
     isFirstFrameAfterReset = true;
+    isInExitMenu = false;
+    paused = false;
+    lostWindowFocus = false;
+    gameOver = false;
+
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 }
 
@@ -159,7 +164,7 @@ void Game::Draw()
 
 void Game::DrawUI()
 {
-    DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth-borderOffsetWidth*2, gameScreenHeight-borderOffsetHeight*2}, 0.18f, 20, 2, yellow);
+    DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth - borderOffsetWidth * 2, gameScreenHeight - borderOffsetHeight * 2}, 0.18f, 20, 2, yellow);
     DrawTextEx(font, "Adrian's raylib template", {200, 10}, 34, 2, yellow);
 }
 
