@@ -56,7 +56,6 @@ RAYLIB_LIBTYPE        ?= STATIC
 BUILD_MODE            ?= RELEASE
 
 # Use external GLFW library instead of rglfw module
-# TODO: Review usage on Linux. Target version of choice. Switch on -lglfw or -lglfw3
 USE_EXTERNAL_GLFW     ?= FALSE
 
 # Use Wayland display server protocol on Linux desktop
@@ -110,7 +109,6 @@ ifeq ($(PLATFORM),PLATFORM_DESKTOP)
 endif
 # Default path for raylib on Raspberry Pi, if installed in different path, update it!
 # This is not currently used by src/Makefile. Not sure of its origin or usage. Refer to wiki.
-# TODO: update install: target in src/Makefile for RPI, consider relation to LINUX.
 ifeq ($(PLATFORM),PLATFORM_RPI)
     RAYLIB_PATH       ?= /home/pi/raylib
 endif

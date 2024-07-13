@@ -11,12 +11,15 @@ Game::Game()
     targetRenderTex = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
     SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR); // Texture scale filter to use
 
+    font = LoadFontEx("Font/monogram.ttf", 64, 0, 0);
+
     InitGame();
 }
 
 Game::~Game()
 {
     UnloadRenderTexture(targetRenderTex);
+    UnloadFont(font);
 }
 
 void Game::InitGame()
@@ -157,6 +160,7 @@ void Game::Draw()
 void Game::DrawUI()
 {
     DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth-borderOffsetWidth*2, gameScreenHeight-borderOffsetHeight*2}, 0.18f, 20, 2, yellow);
+    DrawTextEx(font, "Adrian's raylib template", {200, 10}, 34, 2, yellow);
 }
 
 std::string Game::FormatWithLeadingZeroes(int number, int width)
