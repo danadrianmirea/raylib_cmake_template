@@ -127,7 +127,7 @@ void Game::UpdateUI()
         lostWindowFocus = false;
     }
 
-    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
+    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && isFirstFrameAfterReset == false && IsKeyPressed(KEY_P))
     {
         if (paused)
         {
