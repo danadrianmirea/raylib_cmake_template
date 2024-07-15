@@ -5,9 +5,6 @@
 int main()
 {
     InitWindow(gameScreenWidth, gameScreenHeight, "Adrian's raylib template");
-    //windowWidth = GetScreenWidth();
-    //windowHeight = GetScreenHeight();
-    //SetWindowSize(windowWidth, windowHeight);
     SetWindowPosition(50, 50);
 
     InitAudioDevice();
