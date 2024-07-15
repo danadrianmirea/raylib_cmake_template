@@ -6,20 +6,17 @@ int main()
 {
     InitWindow(gameScreenWidth, gameScreenHeight, "Adrian's raylib template");
 
-
     InitAudioDevice();
     SetMasterVolume(0.22f);
-    SetExitKey(KEY_NULL); // Disable KEY_ESCAPE to close window, X-button still works
-
-    windowWidth = GetScreenWidth();
-    windowHeight = GetScreenHeight();
-    SetWindowSize(windowWidth, windowHeight);
-    
-    SetWindowPosition(50, 50);
-    SetTargetFPS(144);
+    SetExitKey(KEY_NULL);
 
     Game game;
+
+    SetWindowSize(windowWidth, windowHeight);
+    SetWindowPosition(50, 50);
+    SetTargetFPS(144);
     ToggleBorderlessWindowed();
+
     float dt = 0.0f;
 
     while (!exitWindow)
