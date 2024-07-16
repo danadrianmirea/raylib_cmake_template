@@ -8,6 +8,7 @@ Ball::Ball()
     speedX = GetRandomValue(500, 700);
     speedY = GetRandomValue(500, 700);
     radius = 15;
+
     x = GetRandomValue(radius + 50, gameScreenWidth - radius - 50);
     y = GetRandomValue(radius + 50, gameScreenWidth - radius - 0);
 }

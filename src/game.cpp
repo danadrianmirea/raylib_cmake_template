@@ -80,6 +80,23 @@ void Game::UpdateUI()
         return;
     }
 
+#ifdef AM_RAY_DEBUG
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+    {
+        if (fullscreen)
+        {
+            fullscreen = false;
+            ToggleBorderlessWindowed();
+            SetWindowPosition(minimizeOffset, minimizeOffset);
+        }
+        else
+        {
+            fullscreen = true;
+            ToggleBorderlessWindowed();
+        }
+    }
+#endif
+
     if (firstTimeGameStart && IsKeyPressed(KEY_SPACE))
     {
         firstTimeGameStart = false;
