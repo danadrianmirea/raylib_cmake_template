@@ -1,1 +1,1 @@
-"# raylib_vscode_template" 
+A raylib template for VSCode
