@@ -1,18 +1,41 @@
+#include <vector>
+#include <utility>
+#include <string>
 
-#include <raylib.h>
-
-#include "game.h"
+#include "raylib.h"
 #include "globals.h"
+#include "game.h"
 
-Game::Game()
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+bool Game::isMobile = false;
+
+Game::Game(int width, int height)
 {
     firstTimeGameStart = true;
+
+    ballX = width / 2;
+    ballY = height / 2;
+    ballRadius = 50;
+    ballSpeed = 300.0f;
+    ballColor = RED;
+
+#ifdef __EMSCRIPTEN__
+    // Check if we're running on a mobile device
+    isMobile = EM_ASM_INT({
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    });
+#endif
 
     targetRenderTex = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
     SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR); // Texture scale filter to use
 
     font = LoadFontEx("Font/monogram.ttf", 64, 0, 0);
 
+    this->width = width;
+    this->height = height;
     InitGame();
 }
 
@@ -24,7 +47,6 @@ Game::~Game()
 
 void Game::InitGame()
 {
-    isFirstFrameAfterReset = true;
     isInExitMenu = false;
     paused = false;
     lostWindowFocus = false;
@@ -40,39 +62,44 @@ void Game::Reset()
 
 void Game::Update(float dt)
 {
+    if (dt == 0)
+    {
+        return;
+    }
+
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
     UpdateUI();
 
     bool running = (firstTimeGameStart == false && paused == false && lostWindowFocus == false && isInExitMenu == false && gameOver == false);
+
     if (running)
     {
         HandleInput();
-        ball.Update(dt);
     }
 }
 
 void Game::HandleInput()
 {
-    if (isFirstFrameAfterReset)
-    {
-        isFirstFrameAfterReset = false;
-        return;
+    float dt = GetFrameTime();
+    if(IsKeyDown(KEY_W)) {
+        ballY -= ballSpeed * dt;
+    }
+    else if(IsKeyDown(KEY_S)) {
+        ballY += ballSpeed * dt;
     }
 
-    /*
-        if (IsKeyDown(KEY_LEFT))
-        {
+    if(IsKeyDown(KEY_A)) {
+        ballX -= ballSpeed * dt;
+    }
+    else if(IsKeyDown(KEY_D)) {
+        ballX += ballSpeed * dt;
+    }
 
-        }
-        else if (IsKeyDown(KEY_RIGHT))
-        {
-
-        }
-    */
 }
 
 void Game::UpdateUI()
 {
+#ifndef EMSCRIPTEN_BUILD
     if (WindowShouldClose() || (IsKeyPressed(KEY_ESCAPE) && exitWindowRequested == false))
     {
         exitWindowRequested = true;
@@ -80,14 +107,12 @@ void Game::UpdateUI()
         return;
     }
 
-#ifdef AM_RAY_DEBUG
     if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
     {
         if (fullscreen)
         {
             fullscreen = false;
             ToggleBorderlessWindowed();
-            SetWindowPosition(minimizeOffset, minimizeOffset);
         }
         else
         {
@@ -97,14 +122,12 @@ void Game::UpdateUI()
     }
 #endif
 
-    if (firstTimeGameStart && IsKeyPressed(KEY_SPACE))
-    {
-        firstTimeGameStart = false;
+    if(firstTimeGameStart) {
+        if(IsKeyDown(KEY_ENTER)) {
+            firstTimeGameStart = false;
+        }
     }
-    else if (gameOver && IsKeyPressed(KEY_SPACE))
-    {
-        Reset();
-    }
+
 
     if (exitWindowRequested)
     {
@@ -128,7 +151,11 @@ void Game::UpdateUI()
         lostWindowFocus = false;
     }
 
-    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && isFirstFrameAfterReset == false && IsKeyPressed(KEY_P))
+#ifndef EMSCRIPTEN_BUILD
+    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
+#else
+    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ESCAPE)))
+#endif
     {
         if (paused)
         {
@@ -145,9 +172,10 @@ void Game::Draw()
 {
     // render everything to a texture
     BeginTextureMode(targetRenderTex);
-    ClearBackground(darkGreen);
+    ClearBackground(black);
 
-    ball.Draw();
+    DrawCircle(ballX, ballY, ballRadius, ballColor);
+
     DrawUI();
 
     EndTextureMode();
@@ -158,15 +186,63 @@ void Game::Draw()
     DrawTexturePro(targetRenderTex.texture, (Rectangle){0.0f, 0.0f, (float)targetRenderTex.texture.width, (float)-targetRenderTex.texture.height},
                    (Rectangle){(GetScreenWidth() - ((float)gameScreenWidth * screenScale)) * 0.5f, (GetScreenHeight() - ((float)gameScreenHeight * screenScale)) * 0.5f, (float)gameScreenWidth * screenScale, (float)gameScreenHeight * screenScale},
                    (Vector2){0, 0}, 0.0f, WHITE);
-
-    DrawScreenSpaceUI();
     EndDrawing();
 }
 
 void Game::DrawUI()
 {
-    DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth - borderOffsetWidth * 2, gameScreenHeight - borderOffsetHeight * 2}, 0.18f, 20, 2, yellow);
-    DrawTextEx(font, "Adrian's raylib template", {200, 10}, 34, 2, yellow);
+    float screenX = 0.0f;
+    float screenY = 0.0f;
+
+    // DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth - borderOffsetWidth * 2, gameScreenHeight - borderOffsetHeight * 2}, 0.18f, 20, 2, yellow);
+    DrawTextEx(font, "Adrian's Raylib Template", {300, 10}, 34, 2, yellow);
+
+    if (exitWindowRequested)
+    {
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 60}, 0.76f, 20, BLACK);
+        DrawText("Are you sure you want to exit? [Y/N]", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+    }
+    else if (firstTimeGameStart)
+    {
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 80}, 0.76f, 20, BLACK);
+        if (isMobile) {
+            DrawText("Tap to play", screenX + (gameScreenWidth / 2 - 60), screenY + gameScreenHeight / 2 + 10, 20, yellow);
+        } else {
+#ifndef EMSCRIPTEN_BUILD            
+            DrawText("Press Enter to play", screenX + (gameScreenWidth / 2 - 100), screenY + gameScreenHeight / 2 - 10, 20, yellow);
+            DrawText("Alt+Enter: toggle fullscreen", screenX + (gameScreenWidth / 2 - 120), screenY + gameScreenHeight / 2 + 30, 20, yellow);
+#else
+            DrawText("Press Enter to play", screenX + (gameScreenWidth / 2 - 100), screenY + gameScreenHeight / 2 + 10, 20, yellow);
+#endif
+        }
+    }
+    else if (paused)
+    {
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 60}, 0.76f, 20, BLACK);
+#ifndef EMSCRIPTEN_BUILD
+        DrawText("Game paused, press P to continue", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+#else
+        if (isMobile) {
+            DrawText("Game paused, tap to continue", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+        } else {
+            DrawText("Game paused, press P or ESC to continue", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+        }
+#endif
+    }
+    else if (lostWindowFocus)
+    {
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 60}, 0.76f, 20, BLACK);
+        DrawText("Game paused, focus window to continue", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+    }
+    else if (gameOver)
+    {
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 60}, 0.76f, 20, BLACK);
+        if (isMobile) {
+            DrawText("Game over, tap to play again", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+        } else {
+            DrawText("Game over, press Enter to play again", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+        }
+    }
 }
 
 std::string Game::FormatWithLeadingZeroes(int number, int width)
@@ -177,31 +253,6 @@ std::string Game::FormatWithLeadingZeroes(int number, int width)
     return numberText;
 }
 
-void Game::DrawScreenSpaceUI()
+void Game::Randomize()
 {
-    if (exitWindowRequested)
-    {
-        DrawRectangleRounded({(float)(GetScreenWidth() / 2 - 500), (float)(GetScreenHeight() / 2 - 40), 1000, 120}, 0.76f, 20, BLACK);
-        DrawText("Are you sure you want to exit? [Y/N]", GetScreenWidth() / 2 - 400, GetScreenHeight() / 2, 40, yellow);
-    }
-    else if (firstTimeGameStart)
-    {
-        DrawRectangleRounded({(float)(GetScreenWidth() / 2 - 500), (float)(GetScreenHeight() / 2 - 40), 1000, 120}, 0.76f, 20, BLACK);
-        DrawText("Press SPACE to play", GetScreenWidth() / 2 - 200, GetScreenHeight() / 2, 40, yellow);
-    }
-    else if (paused)
-    {
-        DrawRectangleRounded({(float)(GetScreenWidth() / 2 - 500), (float)(GetScreenHeight() / 2 - 40), 1000, 120}, 0.76f, 20, BLACK);
-        DrawText("Game paused, press P to continue", GetScreenWidth() / 2 - 400, GetScreenHeight() / 2, 40, yellow);
-    }
-    else if (lostWindowFocus)
-    {
-        DrawRectangleRounded({(float)(GetScreenWidth() / 2 - 500), (float)(GetScreenHeight() / 2 - 40), 1000, 120}, 0.76f, 20, BLACK);
-        DrawText("Game paused, focus window to continue", GetScreenWidth() / 2 - 400, GetScreenHeight() / 2, 40, yellow);
-    }
-    else if (gameOver)
-    {
-        DrawRectangleRounded({(float)(GetScreenWidth() / 2 - 500), (float)(GetScreenHeight() / 2 - 40), 1000, 120}, 0.76f, 20, BLACK);
-        DrawText("Game over, press SPACE to play again", GetScreenWidth() / 2 - 400, GetScreenHeight() / 2, 40, yellow);
-    }
 }

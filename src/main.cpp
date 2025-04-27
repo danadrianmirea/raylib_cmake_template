@@ -1,31 +1,45 @@
-#include <raylib.h>
-#include "game.h"
+#include "raylib.h"
 #include "globals.h"
+#include "game.h"
+#include <iostream>
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+Game* game = nullptr;
+
+void mainLoop()
+{
+    float dt = GetFrameTime();
+    game->Update(dt);
+    game->Draw();
+}
 
 int main()
 {
-    InitWindow(gameScreenWidth, gameScreenHeight, "Adrian's raylib template");
-    SetWindowPosition(50, 50);
-
-    InitAudioDevice();
-    SetMasterVolume(0.22f);
+    InitWindow(gameScreenWidth, gameScreenHeight, "Game of life");
+#ifndef EMSCRIPTEN_BUILD
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+#endif
     SetExitKey(KEY_NULL);
-
-    Game game;
-    ToggleBorderlessWindowed();
     SetTargetFPS(144);
+    
+    game = new Game(gameScreenWidth, gameScreenHeight);
+    game->Randomize();
 
-    float dt = 0.0f;
-
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(mainLoop, 0, 1);
+#else
+    if(fullscreen) { 
+        ToggleBorderlessWindowed();
+    }
     while (!exitWindow)
     {
-        dt = GetFrameTime();
-        game.Update(dt);
-        game.Draw();
+        mainLoop();
     }
-
-    CloseAudioDevice();
+    delete game;
     CloseWindow();
+#endif
 
     return 0;
 }
