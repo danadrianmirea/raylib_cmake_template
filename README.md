@@ -81,4 +81,4 @@ The game automatically handles:
 
 ## License
 
-This project is licensed under the terms specified in the `LICENSE.txt` file. 
+This project is licensed under the terms specified in the `LICENSE.txt` file.
