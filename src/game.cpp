@@ -1,6 +1,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <cmath>  // For sqrtf
 
 #include "raylib.h"
 #include "globals.h"
@@ -81,20 +82,46 @@ void Game::Update(float dt)
 void Game::HandleInput()
 {
     float dt = GetFrameTime();
-    if(IsKeyDown(KEY_W)) {
-        ballY -= ballSpeed * dt;
-    }
-    else if(IsKeyDown(KEY_S)) {
+
+    if(!isMobile) { // desktop and web controls
+        if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
+            ballY -= ballSpeed * dt;
+        }
+    else if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
         ballY += ballSpeed * dt;
     }
 
-    if(IsKeyDown(KEY_A)) {
+    if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
         ballX -= ballSpeed * dt;
     }
-    else if(IsKeyDown(KEY_D)) {
-        ballX += ballSpeed * dt;
+        else if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
+            ballX += ballSpeed * dt;
+        }
+    } 
+    else // mobile controls
+    {
+        if(IsGestureDetected(GESTURE_DRAG) || IsGestureDetected(GESTURE_HOLD)) {
+            // Get touch position in screen coordinates
+            Vector2 touchPosition = GetTouchPosition(0);
+            
+            // Convert screen coordinates to game coordinates
+            float gameX = (touchPosition.x - (GetScreenWidth() - (gameScreenWidth * screenScale)) * 0.5f) / screenScale;
+            float gameY = (touchPosition.y - (GetScreenHeight() - (gameScreenHeight * screenScale)) * 0.5f) / screenScale;
+            
+            Vector2 ballCenter = { ballX, ballY };
+            Vector2 direction = { gameX - ballCenter.x, gameY - ballCenter.y };
+            
+            // Normalize the direction vector
+            float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
+            if(length > 0) {
+                direction.x /= length;
+                direction.y /= length;
+                
+                ballX += direction.x * ballSpeed * dt;
+                ballY += direction.y * ballSpeed * dt;
+            }
+        }
     }
-
 }
 
 void Game::UpdateUI()
@@ -122,12 +149,16 @@ void Game::UpdateUI()
     }
 #endif
 
-    if(firstTimeGameStart) {
-        if(IsKeyDown(KEY_ENTER)) {
+    if(firstTimeGameStart ) {
+        if(isMobile) {
+            if(IsGestureDetected(GESTURE_TAP)) {
+                firstTimeGameStart = false;
+            }
+        }
+        else if(IsKeyDown(KEY_ENTER)) {
             firstTimeGameStart = false;
         }
     }
-
 
     if (exitWindowRequested)
     {
@@ -157,14 +188,7 @@ void Game::UpdateUI()
     if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ESCAPE)))
 #endif
     {
-        if (paused)
-        {
-            paused = false;
-        }
-        else
-        {
-            paused = true;
-        }
+        paused = !paused;
     }
 }
 
@@ -172,7 +196,7 @@ void Game::Draw()
 {
     // render everything to a texture
     BeginTextureMode(targetRenderTex);
-    ClearBackground(black);
+    ClearBackground(GRAY);
 
     DrawCircle(ballX, ballY, ballRadius, ballColor);
 
