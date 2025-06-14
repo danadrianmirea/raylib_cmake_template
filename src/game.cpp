@@ -41,10 +41,18 @@ Game::Game(int width, int height)
         TraceLog(LOG_ERROR, "Failed to load music file: data/music.mp3");
     } else {
         TraceLog(LOG_INFO, "Music loaded successfully");
-        SetMusicVolume(backgroundMusic, 0.5f);  // Set volume to 50%
+        SetMusicVolume(backgroundMusic, 0.33f);  // Set volume to 50%
         musicPlaying = false;
     }
 
+    // Load action sound
+    actionSound = LoadSound("data/action.mp3");
+    if (actionSound.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, "Failed to load sound file: data/action.mp3");
+    } else {
+        TraceLog(LOG_INFO, "Action sound loaded successfully");
+        SetSoundVolume(actionSound, 1.0f);
+    }
     this->width = width;
     this->height = height;
     InitGame();
@@ -55,6 +63,7 @@ Game::~Game()
     UnloadRenderTexture(targetRenderTex);
     UnloadFont(font);
     UnloadMusicStream(backgroundMusic);
+    UnloadSound(actionSound);
 }
 
 void Game::InitGame()
@@ -109,15 +118,27 @@ void Game::HandleInput()
         if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
             ballY -= ballSpeed * dt;
         }
-    else if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
-        ballY += ballSpeed * dt;
-    }
+        else if(IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) {
+            ballY += ballSpeed * dt;
+        }
 
-    if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
-        ballX -= ballSpeed * dt;
-    }
+        if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
+            ballX -= ballSpeed * dt;
+        }
         else if(IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) {
             ballX += ballSpeed * dt;
+        }
+
+        // Play sound when spacebar is pressed
+        if (IsKeyPressed(KEY_SPACE)) {
+            TraceLog(LOG_INFO, "Spacebar pressed");
+            if (actionSound.stream.buffer != NULL) {
+                TraceLog(LOG_INFO, "Playing action sound");
+                StopSound(actionSound);  // Stop any previous playback
+                PlaySound(actionSound);
+            } else {
+                TraceLog(LOG_ERROR, "Cannot play sound - sound not loaded");
+            }
         }
     } 
     else // mobile controls
@@ -202,6 +223,11 @@ void Game::UpdateUI()
 
     if (optionWindowRequested)
     {
+        if (musicPlaying) {
+            PauseMusicStream(backgroundMusic);
+            musicPlaying = false;
+        }
+
         if (IsKeyPressed(KEY_ENTER))
         {
             // Handle menu selection based on current selection
@@ -210,13 +236,8 @@ void Game::UpdateUI()
                     optionWindowRequested = false;
                     isInExitMenu = false;
                     if (!musicPlaying) {
-                        PlayMusicStream(backgroundMusic);
-                        if (IsMusicStreamPlaying(backgroundMusic)) {
-                            TraceLog(LOG_INFO, "Music started playing");
-                            musicPlaying = true;
-                        } else {
-                            TraceLog(LOG_ERROR, "Failed to start music playback");
-                        }
+                        ResumeMusicStream(backgroundMusic);
+                        musicPlaying = true;
                     }
                     break;
                 case 1: // New game
@@ -224,13 +245,8 @@ void Game::UpdateUI()
                     optionWindowRequested = false;
                     isInExitMenu = false;
                     if (!musicPlaying) {
-                        PlayMusicStream(backgroundMusic);
-                        if (IsMusicStreamPlaying(backgroundMusic)) {
-                            TraceLog(LOG_INFO, "Music started playing");
-                            musicPlaying = true;
-                        } else {
-                            TraceLog(LOG_ERROR, "Failed to start music playback");
-                        }
+                        ResumeMusicStream(backgroundMusic);
+                        musicPlaying = true;
                     }
                     break;
                 case 2: // Options
@@ -241,6 +257,15 @@ void Game::UpdateUI()
                     break;
             }
         }
+        else if (IsKeyPressed(KEY_ESCAPE))
+        {
+            optionWindowRequested = false;
+            isInExitMenu = false;
+            if (!musicPlaying) {
+                ResumeMusicStream(backgroundMusic);
+                musicPlaying = true;
+            }
+        }
         else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
             currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
@@ -248,11 +273,6 @@ void Game::UpdateUI()
         else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
             currentMenuSelection = (currentMenuSelection + 1) % 4;
-        }
-        else if (IsKeyPressed(KEY_ESCAPE))
-        {
-            optionWindowRequested = false;
-            isInExitMenu = false;
         }
 
         // Handle mouse interaction
@@ -285,13 +305,8 @@ void Game::UpdateUI()
                             optionWindowRequested = false;
                             isInExitMenu = false;
                             if (!musicPlaying) {
-                                PlayMusicStream(backgroundMusic);
-                                if (IsMusicStreamPlaying(backgroundMusic)) {
-                                    TraceLog(LOG_INFO, "Music started playing");
-                                    musicPlaying = true;
-                                } else {
-                                    TraceLog(LOG_ERROR, "Failed to start music playback");
-                                }
+                                ResumeMusicStream(backgroundMusic);
+                                musicPlaying = true;
                             }
                             break;
                         case 1: // New game
@@ -299,13 +314,8 @@ void Game::UpdateUI()
                             optionWindowRequested = false;
                             isInExitMenu = false;
                             if (!musicPlaying) {
-                                PlayMusicStream(backgroundMusic);
-                                if (IsMusicStreamPlaying(backgroundMusic)) {
-                                    TraceLog(LOG_INFO, "Music started playing");
-                                    musicPlaying = true;
-                                } else {
-                                    TraceLog(LOG_ERROR, "Failed to start music playback");
-                                }
+                                ResumeMusicStream(backgroundMusic);
+                                musicPlaying = true;
                             }
                             break;
                         case 2: // Options
@@ -333,6 +343,13 @@ void Game::UpdateUI()
     if (optionWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
     {
         paused = !paused;
+        if (paused) {
+            PauseMusicStream(backgroundMusic);
+            musicPlaying = false;
+        } else {
+            ResumeMusicStream(backgroundMusic);
+            musicPlaying = true;
+        }
     }
 }
 

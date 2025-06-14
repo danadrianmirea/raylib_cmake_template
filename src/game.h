@@ -46,4 +46,5 @@ private:
 
     Music backgroundMusic;
     bool musicPlaying = false;
+    Sound actionSound;
 };
