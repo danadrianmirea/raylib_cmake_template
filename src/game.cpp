@@ -33,7 +33,7 @@ Game::Game(int width, int height)
     targetRenderTex = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
     SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR); // Texture scale filter to use
 
-    font = LoadFontEx("Font/monogram.ttf", 64, 0, 0);
+    font = LoadFontEx("data/monogram.ttf", 64, 0, 0);
 
     // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
