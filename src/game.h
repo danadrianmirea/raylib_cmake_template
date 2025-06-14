@@ -23,11 +23,20 @@ public:
     static bool isMobile;
 
 private:
-    bool firstTimeGameStart;
+    bool firstTimeGameStart = true;
     bool isInExitMenu;
-    bool paused;
-    bool lostWindowFocus;
+    bool paused = false;
+    bool lostWindowFocus = false;
     bool gameOver;
+    bool isInMainMenu = false;
+    bool isInOptionsMenu = false;
+    int currentMenuSelection = 0;
+    int optionsMenuSelection = 0;
+    float soundVolume = 1.0f;
+    float musicVolume = 1.0f;
+    bool isDraggingSoundSlider = false;
+    bool isDraggingMusicSlider = false;
+    bool exitWindow = false;
 
     float screenScale;
     RenderTexture2D targetRenderTex;
@@ -41,8 +50,6 @@ private:
     int ballRadius;
     float ballSpeed;
     Color ballColor;
-
-    int currentMenuSelection = 0;
 
     Music backgroundMusic;
     bool musicPlaying = false;
