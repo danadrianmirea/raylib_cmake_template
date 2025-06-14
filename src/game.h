@@ -36,7 +36,6 @@ private:
     float musicVolume = 1.0f;
     bool isDraggingSoundSlider = false;
     bool isDraggingMusicSlider = false;
-    bool exitWindow = false;
 
     float screenScale;
     RenderTexture2D targetRenderTex;
