@@ -234,6 +234,20 @@ void Game::UpdateUI()
         }
     }
 
+    // Handle exit confirmation dialog
+    if (isInExitConfirmation)
+    {
+        if (IsKeyPressed(KEY_Y))
+        {
+            exitWindow = true;
+        }
+        else if (IsKeyPressed(KEY_N))
+        {
+            isInExitConfirmation = false;
+        }
+        return;  // Skip other UI updates while in exit confirmation
+    }
+
     // Handle main menu
     if (isInMainMenu)
     {
@@ -255,7 +269,8 @@ void Game::UpdateUI()
             }
             else if (currentMenuSelection == 3) // Quit
             {
-                exitWindow = true;
+                isInExitConfirmation = true;
+                isInMainMenu = false;
             }
         }
         else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
@@ -307,7 +322,8 @@ void Game::UpdateUI()
                     }
                     else if (i == 3) // Quit
                     {
-                        exitWindow = true;
+                        isInExitConfirmation = true;
+                        isInMainMenu = false;
                     }
                 }
             }
@@ -517,19 +533,24 @@ void Game::Draw()
         DrawText("Back", menuStartX, menuStartY + menuItemHeight * 3, 20, 
                 (optionsMenuSelection == 2) ? YELLOW : WHITE);
     }
+    else if (isInExitConfirmation)
+    {
+        DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
+        DrawText("Are you sure you want to exit? (Y/N)", gameScreenWidth / 2 - 200, gameScreenHeight / 2 - 10, 20, WHITE);
+    }
     else if (paused)
     {
-        DrawRectangleRounded({gameScreenWidth / 2 - 250, gameScreenHeight / 2 - 30, 500, 60}, 0.76f, 20, BLACK);
+        DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
         DrawText("Game paused, press P to continue", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
     }
     else if (lostWindowFocus)
     {
-        DrawRectangleRounded({gameScreenWidth / 2 - 250, gameScreenHeight / 2 - 30, 500, 60}, 0.76f, 20, BLACK);
+        DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
         DrawText("Game paused, focus window to continue", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
     }
     else if (gameOver)
     {
-        DrawRectangleRounded({gameScreenWidth / 2 - 250, gameScreenHeight / 2 - 30, 500, 60}, 0.76f, 20, BLACK);
+        DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
         DrawText("Game over, press Enter to play again", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
     }
     EndTextureMode();
