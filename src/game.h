@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "raylib.h"
+#include "globals.h"
 
 class Game
 {
@@ -41,4 +43,7 @@ private:
     Color ballColor;
 
     int currentMenuSelection = 0;
+
+    Music backgroundMusic;
+    bool musicPlaying = false;
 };
