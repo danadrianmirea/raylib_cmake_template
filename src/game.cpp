@@ -393,6 +393,11 @@ void Game::UpdateUI()
             if (CheckCollisionPointRec({gameX, gameY}, soundSliderRect)) {
                 isDraggingSoundSlider = true;
                 optionsMenuSelection = 0;
+                // Play sound when starting to drag the sound slider
+                if (actionSound.stream.buffer != NULL) {
+                    StopSound(actionSound);
+                    PlaySound(actionSound);
+                }
             }
             else if (CheckCollisionPointRec({gameX, gameY}, musicSliderRect)) {
                 isDraggingMusicSlider = true;
@@ -414,9 +419,16 @@ void Game::UpdateUI()
         }
 
         if (isDraggingSoundSlider) {
-            soundVolume = (gameX - soundSliderRect.x) / soundSliderRect.width;
-            soundVolume = fmaxf(0.0f, fminf(1.0f, soundVolume));
-            SetSoundVolume(actionSound, soundVolume);
+            float newVolume = (gameX - soundSliderRect.x) / soundSliderRect.width;
+            newVolume = fmaxf(0.0f, fminf(1.0f, newVolume));
+            if (newVolume != soundVolume) {  // Only play sound if volume actually changed
+                soundVolume = newVolume;
+                SetSoundVolume(actionSound, soundVolume);
+                if (actionSound.stream.buffer != NULL) {
+                    StopSound(actionSound);
+                    PlaySound(actionSound);
+                }
+            }
         }
         else if (isDraggingMusicSlider) {
             musicVolume = (gameX - musicSliderRect.x) / musicSliderRect.width;
