@@ -36,6 +36,7 @@ private:
     bool isDraggingSoundSlider = false;
     bool isDraggingMusicSlider = false;
     bool isInExitConfirmation = false;
+    bool isMusicPlaying = false;
 
     float screenScale;
     RenderTexture2D targetRenderTex;
@@ -51,6 +52,5 @@ private:
     Color ballColor;
 
     Music backgroundMusic;
-    bool musicPlaying = false;
     Sound actionSound;
 };

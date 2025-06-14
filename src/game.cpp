@@ -24,33 +24,26 @@ Game::Game(int width, int height)
     ballColor = RED;
 
 #ifdef __EMSCRIPTEN__
-    // Check if we're running on a mobile device
     isMobile = EM_ASM_INT({
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     });
 #endif
 
     targetRenderTex = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
-    SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR); // Texture scale filter to use
-
+    SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR);
     font = LoadFontEx("data/PressStart2P-Regular.ttf", 64, 0, 0);
-
-    // Initialize volume values
     musicVolume = 0.10f;
     soundVolume = 0.5f;
 
-    // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
     if (backgroundMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load music file: data/music.mp3");
     } else {
         TraceLog(LOG_INFO, "Music loaded successfully");
         SetMusicVolume(backgroundMusic, musicVolume);
-        PlayMusicStream(backgroundMusic);
-        musicPlaying = true;
+        isMusicPlaying = false;
     }
 
-    // Load action sound
     actionSound = LoadSound("data/action.mp3");
     if (actionSound.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load sound file: data/action.mp3");
@@ -76,9 +69,9 @@ void Game::InitGame()
     isInExitMenu = false;
     lostWindowFocus = false;
     gameOver = false;
-    isInMainMenu = true;  // Show main menu only on first start
-    firstTimeGameStart = true;  // Set first time flag
-    currentMenuSelection = 1;  // Select New Game by default
+    isInMainMenu = true;
+    firstTimeGameStart = true;
+    currentMenuSelection = 1; // on first game start, select new game, continue is not available
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 }
 
@@ -87,9 +80,10 @@ void Game::Reset()
     isInExitMenu = false;
     lostWindowFocus = false;
     gameOver = false;
-    isInMainMenu = false;  // Don't show menu on reset
-    firstTimeGameStart = false;  // Not first time anymore
-
+    isInMainMenu = false;
+    firstTimeGameStart = false;
+    isMusicPlaying = true;
+    PlayMusicStream(backgroundMusic);
     ballX = width / 2;
     ballY = height / 2;
 }
@@ -105,7 +99,7 @@ void Game::Update(float dt)
     UpdateUI();
 
     // Update music
-    if (musicPlaying) {
+    if (isMusicPlaying) {
         UpdateMusicStream(backgroundMusic);
     }
 
@@ -182,7 +176,7 @@ void Game::UpdateUI()
     {
         isInExitConfirmation = true;
         isInMainMenu = false;
-        isInOptionsMenu = false;
+        isMusicPlaying = false;  // Stop music when exiting
         return;  // Skip other UI updates while showing exit confirmation
     }
 
@@ -190,11 +184,13 @@ void Game::UpdateUI()
     if (IsWindowFocused() == false)
     {
         lostWindowFocus = true;
+        isMusicPlaying = false;  // Stop music when window loses focus
         return;  // Skip other UI updates when window loses focus
     }
     else
     {
         lostWindowFocus = false;
+        isMusicPlaying = true;
     }
 
     // Handle exit confirmation dialog first
@@ -208,6 +204,7 @@ void Game::UpdateUI()
         {
             isInExitConfirmation = false;
             isInMainMenu = true;  // Return to main menu after canceling exit
+            isMusicPlaying = false;  // Stop music when in menu
         }
         return;  // Skip other UI updates while in exit confirmation
     }
@@ -220,22 +217,26 @@ void Game::UpdateUI()
             // Close options menu and return to main menu
             isInOptionsMenu = false;
             isInMainMenu = true;
+            isMusicPlaying = false;  // Stop music when in menu
         }
         else if (!firstTimeGameStart && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
         {
             // Open main menu
             isInMainMenu = true;
+            isMusicPlaying = false;  // Stop music when in menu
         }
         else if (isInMainMenu && !firstTimeGameStart)  // Allow ESC to close menu if not first time
         {
             // Close main menu and return to gameplay
             isInMainMenu = false;
+            isMusicPlaying = true;  // Resume music when returning to gameplay
         }
     }
 
     // Handle main menu
     if (isInMainMenu)
     {
+        isMusicPlaying = false;  // Stop music when in menu
         // Track mouse movement for hover only
         static Vector2 lastMousePos = GetMousePosition();
         Vector2 currentMousePos = GetMousePosition();
@@ -249,10 +250,11 @@ void Game::UpdateUI()
             {
                 isInMainMenu = false;
                 firstTimeGameStart = false;
+                isMusicPlaying = true;  // Start music when continuing
             }
             else if (currentMenuSelection == 1) // New Game
             {
-                Reset();  // This will set isInMainMenu to false
+                Reset();  // This will set isInMainMenu to false and isMusicPlaying to true
             }
             else if (currentMenuSelection == 2) // Options
             {
@@ -327,11 +329,12 @@ void Game::UpdateUI()
                 {
                     isInMainMenu = false;
                     firstTimeGameStart = false;
+                    isMusicPlaying = true;  // Start music when continuing
                 }
                 else if (i == 1) // New Game
                 {
                     isInMainMenu = false;
-                    Reset();
+                    Reset();  // This will set isMusicPlaying to true
                 }
                 else if (i == 2) // Options
                 {
