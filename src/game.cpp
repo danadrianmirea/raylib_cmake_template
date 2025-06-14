@@ -73,6 +73,8 @@ void Game::InitGame()
     firstTimeGameStart = true;
     currentMenuSelection = 1; // on first game start, select new game, continue is not available
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
+
+    PlayMusicStream(backgroundMusic);
 }
 
 void Game::Reset()
@@ -83,7 +85,6 @@ void Game::Reset()
     isInMainMenu = false;
     firstTimeGameStart = false;
     isMusicPlaying = true;
-    PlayMusicStream(backgroundMusic);
     ballX = width / 2;
     ballY = height / 2;
 }
@@ -197,6 +198,7 @@ void Game::UpdateUI()
     // Handle exit confirmation dialog first
     if (isInExitConfirmation)
     {
+        isMusicPlaying = false;
         if (IsKeyPressed(KEY_Y))
         {
             exitWindow = true;
@@ -204,8 +206,9 @@ void Game::UpdateUI()
         else if (IsKeyPressed(KEY_N))
         {
             isInExitConfirmation = false;
-            isInMainMenu = true;  // Return to main menu after canceling exit
-            isMusicPlaying = false;  // Stop music when in menu
+            isInMainMenu = false;
+            isInOptionsMenu = false;
+            isMusicPlaying = true;
         }
         return;  // Skip other UI updates while in exit confirmation
     }
