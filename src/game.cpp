@@ -177,6 +177,15 @@ void Game::HandleInput()
 
 void Game::UpdateUI()
 {
+    // Handle window close button (X)
+    if (WindowShouldClose() && !isInExitConfirmation)
+    {
+        isInExitConfirmation = true;
+        isInMainMenu = false;
+        isInOptionsMenu = false;
+        return;  // Skip other UI updates while showing exit confirmation
+    }
+
     // Handle window focus first
     if (IsWindowFocused() == false)
     {
