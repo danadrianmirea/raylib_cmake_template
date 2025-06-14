@@ -236,6 +236,12 @@ void Game::UpdateUI()
     // Handle main menu
     if (isInMainMenu)
     {
+        // Track mouse movement for hover only
+        static Vector2 lastMousePos = GetMousePosition();
+        Vector2 currentMousePos = GetMousePosition();
+        bool mouseMoved = (currentMousePos.x != lastMousePos.x || currentMousePos.y != lastMousePos.y);
+        lastMousePos = currentMousePos;
+
         // Handle keyboard navigation
         if (IsKeyPressed(KEY_ENTER))
         {
@@ -307,31 +313,35 @@ void Game::UpdateUI()
                 (float)menuItemHeight
             };
 
-            if (CheckCollisionPointRec({gameX, gameY}, menuItemRect))
+            // Handle hover only if mouse has moved
+            if (mouseMoved && CheckCollisionPointRec({gameX, gameY}, menuItemRect))
             {
                 currentMenuSelection = i;
-                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            }
+
+            // Handle clicks regardless of mouse movement
+            if (CheckCollisionPointRec({gameX, gameY}, menuItemRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            {
+                currentMenuSelection = i;
+                if (i == 0) // Continue
                 {
-                    if (i == 0) // Continue
-                    {
-                        isInMainMenu = false;
-                        firstTimeGameStart = false;
-                    }
-                    else if (i == 1) // New Game
-                    {
-                        isInMainMenu = false;
-                        Reset();
-                    }
-                    else if (i == 2) // Options
-                    {
-                        isInMainMenu = false;
-                        isInOptionsMenu = true;
-                    }
-                    else if (i == 3) // Quit
-                    {
-                        isInExitConfirmation = true;
-                        isInMainMenu = false;
-                    }
+                    isInMainMenu = false;
+                    firstTimeGameStart = false;
+                }
+                else if (i == 1) // New Game
+                {
+                    isInMainMenu = false;
+                    Reset();
+                }
+                else if (i == 2) // Options
+                {
+                    isInMainMenu = false;
+                    isInOptionsMenu = true;
+                }
+                else if (i == 3) // Quit
+                {
+                    isInExitConfirmation = true;
+                    isInMainMenu = false;
                 }
             }
         }
@@ -339,6 +349,12 @@ void Game::UpdateUI()
     // Handle options menu
     else if (isInOptionsMenu)
     {
+        // Track mouse movement for hover only
+        static Vector2 lastMousePos = GetMousePosition();
+        Vector2 currentMousePos = GetMousePosition();
+        bool mouseMoved = (currentMousePos.x != lastMousePos.x || currentMousePos.y != lastMousePos.y);
+        lastMousePos = currentMousePos;
+
         if (IsKeyPressed(KEY_ENTER))
         {
             if (optionsMenuSelection == 2) // Back option
@@ -396,13 +412,14 @@ void Game::UpdateUI()
         float gameY = (mousePos.y - (GetScreenHeight() - (gameScreenHeight * screenScale)) * 0.5f) / screenScale;
 
         // Slider dimensions
-        const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
-        const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
-        const int menuItemHeight = 60;                      // More vertical space
-        const int sliderWidth = 250;                        // Wider sliders
+        const int menuStartY = gameScreenHeight / 2 - 120;
+        const int menuStartX = gameScreenWidth / 2 - 200;
+        const int menuItemHeight = 60;
+        const int sliderWidth = 250;
         const int sliderHeight = 20;
-        const int menuWidth = 500;                          // Increased width by 50 pixels
-        const int menuHeight = 280;                         
+        const int menuWidth = 500;
+        const int menuHeight = 280;
+
         // Sound volume slider
         Rectangle soundSliderRect = {
             (float)menuStartX + 150,
@@ -427,7 +444,21 @@ void Game::UpdateUI()
             (float)menuItemHeight
         };
 
-        // Handle slider dragging
+        // Handle hover only if mouse has moved
+        if (mouseMoved)
+        {
+            if (CheckCollisionPointRec({gameX, gameY}, soundSliderRect)) {
+                optionsMenuSelection = 0;
+            }
+            else if (CheckCollisionPointRec({gameX, gameY}, musicSliderRect)) {
+                optionsMenuSelection = 1;
+            }
+            else if (CheckCollisionPointRec({gameX, gameY}, backButtonRect)) {
+                optionsMenuSelection = 2;
+            }
+        }
+
+        // Handle slider dragging and clicks regardless of mouse movement
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             if (CheckCollisionPointRec({gameX, gameY}, soundSliderRect)) {
                 isDraggingSoundSlider = true;
@@ -449,12 +480,9 @@ void Game::UpdateUI()
         }
 
         // Handle back button click
-        if (CheckCollisionPointRec({gameX, gameY}, backButtonRect)) {
-            optionsMenuSelection = 2;
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                isInOptionsMenu = false;
-                isInMainMenu = true;
-            }
+        if (CheckCollisionPointRec({gameX, gameY}, backButtonRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            isInOptionsMenu = false;
+            isInMainMenu = true;
         }
 
         if (isDraggingSoundSlider) {
