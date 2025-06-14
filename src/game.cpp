@@ -36,8 +36,8 @@ Game::Game(int width, int height)
     font = LoadFontEx("data/PressStart2P-Regular.ttf", 64, 0, 0);
 
     // Initialize volume values
-    musicVolume = 0.33f;  // 33% for music
-    soundVolume = 1.0f;   // 100% for sound effects
+    musicVolume = 0.10f;
+    soundVolume = 1.0f;
 
     // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
@@ -357,12 +357,13 @@ void Game::UpdateUI()
         float gameY = (mousePos.y - (GetScreenHeight() - (gameScreenHeight * screenScale)) * 0.5f) / screenScale;
 
         // Slider dimensions
-        const int sliderWidth = 200;
+        const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
+        const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
+        const int menuItemHeight = 60;                      // More vertical space
+        const int sliderWidth = 250;                        // Wider sliders
         const int sliderHeight = 20;
-        const int menuStartY = gameScreenHeight / 2 - 100;
-        const int menuStartX = gameScreenWidth / 2 - 150;
-        const int menuItemHeight = 50;
-
+        const int menuWidth = 500;                          // Increased width by 50 pixels
+        const int menuHeight = 280;                         
         // Sound volume slider
         Rectangle soundSliderRect = {
             (float)menuStartX + 150,
@@ -473,17 +474,19 @@ void Game::Draw()
     }
     else if (isInOptionsMenu)
     {
-        const int menuStartY = gameScreenHeight / 2 - 100;
-        const int menuStartX = gameScreenWidth / 2 - 150;
-        const int menuItemHeight = 50;
-        const int sliderWidth = 200;
+        const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
+        const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
+        const int menuItemHeight = 60;                      // More vertical space
+        const int sliderWidth = 250;                        // Wider sliders
         const int sliderHeight = 20;
+        const int menuWidth = 500;                          // Increased width by 50 pixels
+        const int menuHeight = 280;                         
 
         // Draw menu background
-        DrawRectangle(menuStartX - 10, menuStartY - 10, 320, 220, {0, 0, 0, 200});
+        DrawRectangle(menuStartX - 10, menuStartY - 10, menuWidth, menuHeight, {0, 0, 0, 200});
 
         // Draw menu title
-        DrawText("Options", menuStartX, menuStartY - 40, 20, WHITE);
+        DrawText("Options", menuStartX, menuStartY, 20, WHITE);
 
         // Draw sound volume slider
         DrawText("Sound Volume", menuStartX, menuStartY + menuItemHeight, 20, 
@@ -495,7 +498,7 @@ void Game::Draw()
         // Draw sound volume percentage
         char soundVolText[32];
         sprintf(soundVolText, "%d%%", (int)(soundVolume * 100));
-        DrawText(soundVolText, menuStartX + 150 + sliderWidth + 10, menuStartY + menuItemHeight, 20, WHITE);
+        DrawText(soundVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight, 20, WHITE);
 
         // Draw music volume slider
         DrawText("Music Volume", menuStartX, menuStartY + menuItemHeight * 2, 20, 
@@ -507,7 +510,7 @@ void Game::Draw()
         // Draw music volume percentage
         char musicVolText[32];
         sprintf(musicVolText, "%d%%", (int)(musicVolume * 100));
-        DrawText(musicVolText, menuStartX + 150 + sliderWidth + 10, menuStartY + menuItemHeight * 2, 20, WHITE);
+        DrawText(musicVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight * 2, 20, WHITE);
 
         // Draw back button
         DrawText("Back", menuStartX, menuStartY + menuItemHeight * 3, 20, 
