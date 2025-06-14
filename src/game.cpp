@@ -566,7 +566,7 @@ void Game::Draw()
     else if (lostWindowFocus)
     {
         DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
-        DrawText("Game paused, focus window to continue", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
+        DrawText("Game paused, focus window to continue", gameScreenWidth / 2 - 200, gameScreenHeight / 2 - 10, 20, WHITE);
     }
     else if (gameOver)
     {
