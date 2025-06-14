@@ -15,8 +15,7 @@ bool Game::isMobile = false;
 
 Game::Game(int width, int height)
 {
-    firstTimeGameStart = true;
-
+    isInitialLaunch = true;
     ballX = width / 2;
     ballY = height / 2;
     ballRadius = 50;
@@ -70,7 +69,7 @@ void Game::InitGame()
     lostWindowFocus = false;
     gameOver = false;
     isInMainMenu = true;
-    firstTimeGameStart = true;
+    isInitialLaunch = true;
     currentMenuSelection = 1; // on first game start, select new game, continue is not available
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 
@@ -83,7 +82,7 @@ void Game::Reset()
     lostWindowFocus = false;
     gameOver = false;
     isInMainMenu = false;
-    firstTimeGameStart = false;
+    isInitialLaunch = false;
     isMusicPlaying = true;
     ballX = width / 2;
     ballY = height / 2;
@@ -203,9 +202,9 @@ void Game::UpdateUI()
             isMusicPlaying = false;
         }
 
-        if(firstTimeGameStart)
+        if(isInitialLaunch)
         {
-            firstTimeGameStart = false;
+            isInitialLaunch = false;
         }
 
         if (IsKeyPressed(KEY_Y))
@@ -232,17 +231,18 @@ void Game::UpdateUI()
             isInMainMenu = true;
             isMusicPlaying = false;  // Stop music when in menu
         }
-        else if (!firstTimeGameStart && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
+        else if (!isInitialLaunch && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
         {
             // Open main menu
             isInMainMenu = true;
             isMusicPlaying = false;  // Stop music when in menu
         }
-        else if (isInMainMenu && !firstTimeGameStart)  // Allow ESC to close menu if not first time
+        else if (isInMainMenu && !isInitialLaunch)  // Allow ESC to close menu if not first time
         {
             // Close main menu and return to gameplay
             isInMainMenu = false;
             isMusicPlaying = true;  // Resume music when returning to gameplay
+            isInitialLaunch = false;
         }
     }
 
@@ -262,7 +262,7 @@ void Game::UpdateUI()
             if (currentMenuSelection == 0) // Continue
             {
                 isInMainMenu = false;
-                firstTimeGameStart = false;
+                isInitialLaunch = false;
                 isMusicPlaying = true;  // Start music when continuing
             }
             else if (currentMenuSelection == 1) // New Game
@@ -282,7 +282,7 @@ void Game::UpdateUI()
         }
         else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
-            if (firstTimeGameStart && currentMenuSelection == 1)  // If on New Game and first time
+            if (isInitialLaunch && currentMenuSelection == 1)  // If on New Game and first time
             {
                 currentMenuSelection = 3;  // Skip Continue, go to Quit
             }
@@ -290,12 +290,12 @@ void Game::UpdateUI()
             {
                 do {
                     currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
-                } while (firstTimeGameStart && currentMenuSelection == 0);  // Skip Continue on first time
+                } while (isInitialLaunch && currentMenuSelection == 0);  // Skip Continue on first time
             }
         }
         else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
-            if (firstTimeGameStart && currentMenuSelection == 3)  // If on Quit and first time
+            if (isInitialLaunch && currentMenuSelection == 3)  // If on Quit and first time
             {
                 currentMenuSelection = 1;  // Skip Continue, go to New Game
             }
@@ -303,7 +303,7 @@ void Game::UpdateUI()
             {
                 do {
                     currentMenuSelection = (currentMenuSelection + 1) % 4;
-                } while (firstTimeGameStart && currentMenuSelection == 0);  // Skip Continue on first time
+                } while (isInitialLaunch && currentMenuSelection == 0);  // Skip Continue on first time
             }
         }
 
@@ -319,7 +319,7 @@ void Game::UpdateUI()
         // Check menu item hover and click
         for (int i = 0; i < 4; i++)
         {
-            if (firstTimeGameStart && i == 0) continue;  // Skip Continue option on first time
+            if (isInitialLaunch && i == 0) continue;  // Skip Continue option on first time
 
             Rectangle menuItemRect = {
                 (float)menuStartX,
@@ -341,7 +341,7 @@ void Game::UpdateUI()
                 if (i == 0) // Continue
                 {
                     isInMainMenu = false;
-                    firstTimeGameStart = false;
+                    isInitialLaunch = false;
                     isMusicPlaying = true;  // Start music when continuing
                 }
                 else if (i == 1) // New Game
@@ -547,7 +547,7 @@ void Game::Draw()
             {
                 textColor = YELLOW;
             }
-            else if (i == 0 && firstTimeGameStart)  // Gray out Continue on first start
+            else if (i == 0 && isInitialLaunch)  // Gray out Continue on first start
             {
                 textColor = DARKGRAY;
             }

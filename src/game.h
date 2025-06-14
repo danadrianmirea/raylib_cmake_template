@@ -23,7 +23,7 @@ public:
     static bool isMobile;
 
 private:
-    bool firstTimeGameStart = true;
+    bool isInitialLaunch = true;
     bool isInExitMenu;
     bool lostWindowFocus = false;
     bool gameOver;
