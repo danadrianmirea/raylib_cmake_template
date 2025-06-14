@@ -198,7 +198,16 @@ void Game::UpdateUI()
     // Handle exit confirmation dialog first
     if (isInExitConfirmation)
     {
-        isMusicPlaying = false;
+        if(isMusicPlaying) 
+        {
+            isMusicPlaying = false;
+        }
+
+        if(firstTimeGameStart)
+        {
+            firstTimeGameStart = false;
+        }
+
         if (IsKeyPressed(KEY_Y))
         {
             exitWindow = true;
