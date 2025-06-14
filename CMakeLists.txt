@@ -49,7 +49,6 @@ else()
 endif()
 
 # Copy font files to build directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/Font DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR})
 
 # Create zip file of bin directory contents
@@ -70,4 +69,4 @@ install(TARGETS ${PROJECT_NAME}
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
-) 
+)

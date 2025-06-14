@@ -33,7 +33,7 @@ Game::Game(int width, int height)
     targetRenderTex = LoadRenderTexture(gameScreenWidth, gameScreenHeight);
     SetTextureFilter(targetRenderTex.texture, TEXTURE_FILTER_BILINEAR); // Texture scale filter to use
 
-    font = LoadFontEx("data/monogram.ttf", 64, 0, 0);
+    font = LoadFontEx("data/PressStart2P-Regular.ttf", 64, 0, 0);
 
     // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
@@ -363,7 +363,7 @@ void Game::DrawUI()
     float screenY = 0.0f;
 
     // DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth - borderOffsetWidth * 2, gameScreenHeight - borderOffsetHeight * 2}, 0.18f, 20, 2, yellow);
-    DrawTextEx(font, "Adrian's Raylib Template", {300, 10}, 34, 2, yellow);
+    DrawTextEx(font, "Adrian's Raylib Template", {300, 10}, 18, 2, yellow);
 
     if (optionWindowRequested)
     {
