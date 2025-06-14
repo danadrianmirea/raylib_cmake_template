@@ -37,7 +37,7 @@ Game::Game(int width, int height)
 
     // Initialize volume values
     musicVolume = 0.10f;
-    soundVolume = 1.0f;
+    soundVolume = 0.5f;
 
     // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
@@ -352,11 +352,19 @@ void Game::UpdateUI()
             {
                 soundVolume = fmaxf(0.0f, soundVolume - 0.05f);
                 SetSoundVolume(actionSound, soundVolume);
+                if (actionSound.stream.buffer != NULL) {
+                    StopSound(actionSound);
+                    PlaySound(actionSound);
+                }
             }
             else if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
             {
                 soundVolume = fminf(1.0f, soundVolume + 0.05f);
                 SetSoundVolume(actionSound, soundVolume);
+                if (actionSound.stream.buffer != NULL) {
+                    StopSound(actionSound);
+                    PlaySound(actionSound);
+                }
             }
         }
         else if (optionsMenuSelection == 1) // Music Volume
