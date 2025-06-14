@@ -176,16 +176,17 @@ void Game::UpdateUI()
     {
         isInExitConfirmation = true;
         isInMainMenu = false;
-        isMusicPlaying = false;  // Stop music when exiting
-        return;  // Skip other UI updates while showing exit confirmation
+        isInOptionsMenu = false;
+        isMusicPlaying = false;
+        return;
     }
 
     // Handle window focus first
     if (IsWindowFocused() == false)
     {
         lostWindowFocus = true;
-        isMusicPlaying = false;  // Stop music when window loses focus
-        return;  // Skip other UI updates when window loses focus
+        isMusicPlaying = false;
+        return;
     }
     else
     {
