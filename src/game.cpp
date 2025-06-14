@@ -181,11 +181,11 @@ void Game::UpdateUI()
                     break;
             }
         }
-        else if (IsKeyPressed(KEY_UP))
+        else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
             currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
         }
-        else if (IsKeyPressed(KEY_DOWN))
+        else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
             currentMenuSelection = (currentMenuSelection + 1) % 4;
         }
