@@ -13,7 +13,7 @@ extern Color yellow;
 extern const int gameScreenWidth;
 extern const int gameScreenHeight;
 extern bool exitWindow;
-extern bool exitWindowRequested;
+extern bool optionWindowRequested;
 extern bool fullscreen;
 extern const int minimizeOffset;
 extern float borderOffsetWidth;

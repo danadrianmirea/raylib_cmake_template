@@ -126,10 +126,9 @@ void Game::HandleInput()
 
 void Game::UpdateUI()
 {
-#ifndef EMSCRIPTEN_BUILD
-    if (WindowShouldClose() || (IsKeyPressed(KEY_ESCAPE) && exitWindowRequested == false))
+    if (WindowShouldClose() || (IsKeyPressed(KEY_ESCAPE) && optionWindowRequested == false))
     {
-        exitWindowRequested = true;
+        optionWindowRequested = true;
         isInExitMenu = true;
         return;
     }
@@ -147,7 +146,6 @@ void Game::UpdateUI()
             ToggleBorderlessWindowed();
         }
     }
-#endif
 
     if(firstTimeGameStart ) {
         if(isMobile) {
@@ -160,15 +158,40 @@ void Game::UpdateUI()
         }
     }
 
-    if (exitWindowRequested)
+    if (optionWindowRequested)
     {
-        if (IsKeyPressed(KEY_Y))
+        if (IsKeyPressed(KEY_ENTER))
         {
-            exitWindow = true;
+            // Handle menu selection based on current selection
+            switch (currentMenuSelection) {
+                case 0: // Continue
+                    optionWindowRequested = false;
+                    isInExitMenu = false;
+                    break;
+                case 1: // New game
+                    Reset();
+                    optionWindowRequested = false;
+                    isInExitMenu = false;
+                    break;
+                case 2: // Options
+                    // TODO: Implement options menu
+                    break;
+                case 3: // Quit game
+                    exitWindow = true;
+                    break;
+            }
         }
-        else if (IsKeyPressed(KEY_N) || IsKeyPressed(KEY_ESCAPE))
+        else if (IsKeyPressed(KEY_UP))
         {
-            exitWindowRequested = false;
+            currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+        }
+        else if (IsKeyPressed(KEY_DOWN))
+        {
+            currentMenuSelection = (currentMenuSelection + 1) % 4;
+        }
+        else if (IsKeyPressed(KEY_ESCAPE))
+        {
+            optionWindowRequested = false;
             isInExitMenu = false;
         }
     }
@@ -182,11 +205,7 @@ void Game::UpdateUI()
         lostWindowFocus = false;
     }
 
-#ifndef EMSCRIPTEN_BUILD
-    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
-#else
-    if (exitWindowRequested == false && lostWindowFocus == false && gameOver == false && (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_ESCAPE)))
-#endif
+    if (optionWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
     {
         paused = !paused;
     }
@@ -221,10 +240,17 @@ void Game::DrawUI()
     // DrawRectangleRoundedLines({borderOffsetWidth, borderOffsetHeight, gameScreenWidth - borderOffsetWidth * 2, gameScreenHeight - borderOffsetHeight * 2}, 0.18f, 20, 2, yellow);
     DrawTextEx(font, "Adrian's Raylib Template", {300, 10}, 34, 2, yellow);
 
-    if (exitWindowRequested)
+    if (optionWindowRequested)
     {
-        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 20), 500, 60}, 0.76f, 20, BLACK);
-        DrawText("Are you sure you want to exit? [Y/N]", screenX + (gameScreenWidth / 2 - 200), screenY + gameScreenHeight / 2, 20, yellow);
+        DrawRectangleRounded({screenX + (float)(gameScreenWidth / 2 - 250), screenY + (float)(gameScreenHeight / 2 - 100), 500, 200}, 0.76f, 20, BLACK);
+        
+        const char* menuItems[] = {"Continue", "New game", "Options", "Quit game"};
+        int yOffset = gameScreenHeight / 2 - 80;
+        
+        for (int i = 0; i < 4; i++) {
+            Color textColor = (i == currentMenuSelection) ? YELLOW : WHITE;
+            DrawText(menuItems[i], screenX + (gameScreenWidth / 2 - 100), yOffset + (i * 40), 20, textColor);
+        }
     }
     else if (firstTimeGameStart)
     {

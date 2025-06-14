@@ -39,4 +39,6 @@ private:
     int ballRadius;
     float ballSpeed;
     Color ballColor;
+
+    int currentMenuSelection = 0;
 };
