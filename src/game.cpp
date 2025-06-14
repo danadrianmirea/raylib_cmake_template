@@ -95,10 +95,6 @@ void Game::Update(float dt)
     // Update music
     if (musicPlaying) {
         UpdateMusicStream(backgroundMusic);
-        if (IsMusicStreamPlaying(backgroundMusic) == false) {
-            TraceLog(LOG_WARNING, "Music stopped playing unexpectedly");
-            musicPlaying = false;
-        }
     }
 
     // Only run game logic if no menus are open and game is not paused
@@ -135,14 +131,10 @@ void Game::HandleInput()
 
         // Play sound when spacebar is pressed
         if (IsKeyPressed(KEY_SPACE)) {
-            TraceLog(LOG_INFO, "Spacebar pressed");
             if (actionSound.stream.buffer != NULL) {
-                TraceLog(LOG_INFO, "Playing action sound");
                 StopSound(actionSound);  // Stop any previous playback
                 PlaySound(actionSound);
-            } else {
-                TraceLog(LOG_ERROR, "Cannot play sound - sound not loaded");
-            }
+            } 
         }
     } 
     else // mobile controls
@@ -460,7 +452,7 @@ void Game::Draw()
 {
     // Render everything to the texture
     BeginTextureMode(targetRenderTex);
-    ClearBackground(RAYWHITE);
+    ClearBackground(GRAY);
     DrawCircle(ballX, ballY, ballRadius, ballColor);
     DrawFPS(10, 10);
 
