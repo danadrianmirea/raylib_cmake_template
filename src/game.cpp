@@ -35,14 +35,19 @@ Game::Game(int width, int height)
 
     font = LoadFontEx("data/PressStart2P-Regular.ttf", 64, 0, 0);
 
+    // Initialize volume values
+    musicVolume = 0.33f;  // 33% for music
+    soundVolume = 1.0f;   // 100% for sound effects
+
     // Load and setup background music
     backgroundMusic = LoadMusicStream("data/music.mp3");
     if (backgroundMusic.stream.buffer == NULL) {
         TraceLog(LOG_ERROR, "Failed to load music file: data/music.mp3");
     } else {
         TraceLog(LOG_INFO, "Music loaded successfully");
-        SetMusicVolume(backgroundMusic, 0.33f);  // Set volume to 50%
-        musicPlaying = false;
+        SetMusicVolume(backgroundMusic, musicVolume);
+        PlayMusicStream(backgroundMusic);
+        musicPlaying = true;
     }
 
     // Load action sound
@@ -51,7 +56,7 @@ Game::Game(int width, int height)
         TraceLog(LOG_ERROR, "Failed to load sound file: data/action.mp3");
     } else {
         TraceLog(LOG_INFO, "Action sound loaded successfully");
-        SetSoundVolume(actionSound, 1.0f);
+        SetSoundVolume(actionSound, soundVolume);
     }
     this->width = width;
     this->height = height;
@@ -211,31 +216,16 @@ void Game::UpdateUI()
             {
                 isInMainMenu = false;
                 firstTimeGameStart = false;
-                if (!musicPlaying)
-                {
-                    PlayMusicStream(backgroundMusic);
-                    if (IsMusicStreamPlaying(backgroundMusic))
-                    {
-                        musicPlaying = true;
-                    }
-                }
             }
             else if (currentMenuSelection == 1) // New Game
             {
                 Reset();  // This will set isInMainMenu to false
-                if (!musicPlaying)
-                {
-                    PlayMusicStream(backgroundMusic);
-                    if (IsMusicStreamPlaying(backgroundMusic))
-                    {
-                        musicPlaying = true;
-                    }
-                }
             }
             else if (currentMenuSelection == 2) // Options
             {
                 isInMainMenu = false;
                 isInOptionsMenu = true;
+                // No need to read volumes as we maintain them ourselves
             }
             else if (currentMenuSelection == 3) // Quit
             {
@@ -500,16 +490,24 @@ void Game::Draw()
                 (optionsMenuSelection == 0) ? YELLOW : WHITE);
         DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, sliderWidth, sliderHeight, GRAY);
         DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, 
-                        sliderWidth * soundVolume, sliderHeight, 
-                        (optionsMenuSelection == 0) ? YELLOW : WHITE);
+                    sliderWidth * soundVolume, sliderHeight, 
+                    (optionsMenuSelection == 0) ? YELLOW : WHITE);
+        // Draw sound volume percentage
+        char soundVolText[32];
+        sprintf(soundVolText, "%d%%", (int)(soundVolume * 100));
+        DrawText(soundVolText, menuStartX + 150 + sliderWidth + 10, menuStartY + menuItemHeight, 20, WHITE);
 
         // Draw music volume slider
         DrawText("Music Volume", menuStartX, menuStartY + menuItemHeight * 2, 20, 
                 (optionsMenuSelection == 1) ? YELLOW : WHITE);
         DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, sliderWidth, sliderHeight, GRAY);
         DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, 
-                        sliderWidth * musicVolume, sliderHeight, 
-                        (optionsMenuSelection == 1) ? YELLOW : WHITE);
+                    sliderWidth * musicVolume, sliderHeight, 
+                    (optionsMenuSelection == 1) ? YELLOW : WHITE);
+        // Draw music volume percentage
+        char musicVolText[32];
+        sprintf(musicVolText, "%d%%", (int)(musicVolume * 100));
+        DrawText(musicVolText, menuStartX + 150 + sliderWidth + 10, menuStartY + menuItemHeight * 2, 20, WHITE);
 
         // Draw back button
         DrawText("Back", menuStartX, menuStartY + menuItemHeight * 3, 20, 
