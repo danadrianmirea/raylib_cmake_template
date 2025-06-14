@@ -1,8 +1,7 @@
 #include <vector>
 #include <utility>
 #include <string>
-#include <cmath>  // For sqrtf
-
+#include <cmath>
 #include "raylib.h"
 #include "globals.h"
 #include "game.h"
@@ -550,7 +549,7 @@ void Game::DrawMainMenu()
         {
             textColor = YELLOW;
         }
-        else if (i == 0 && isInitialLaunch)  // Gray out Continue on first start
+        else if (i == 0 && isInitialLaunch)
         {
             textColor = DARKGRAY;
         }
@@ -564,13 +563,13 @@ void Game::DrawMainMenu()
 
 void Game::DrawOptionsMenu()
 {
-    const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
-    const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
-    const int menuItemHeight = 60;                      // More vertical space
-    const int sliderWidth = 250;                        // Wider sliders
+    const int menuStartY = gameScreenHeight / 2 - 120;
+    const int menuStartX = gameScreenWidth / 2 - 200;
+    const int menuItemHeight = 60;
+    const int sliderWidth = 250;
     const int sliderHeight = 20;
-    const int menuWidth = 500;                          // Increased width by 50 pixels
-    const int menuHeight = 280;                         
+    const int menuWidth = 500;
+    const int menuHeight = 280;
 
     // Draw menu background
     DrawRectangle(menuStartX - 10, menuStartY - 10, menuWidth, menuHeight, {0, 0, 0, 200});
@@ -614,10 +613,7 @@ void Game::Draw()
     ClearBackground(GRAY);
     DrawCircle(ballX, ballY, ballRadius, ballColor);
     DrawFPS(10, 10);
-
     DrawUI();
-
-
     EndTextureMode();
 
     // Draw the texture to the screen
