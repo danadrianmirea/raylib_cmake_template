@@ -69,7 +69,6 @@ Game::~Game()
 void Game::InitGame()
 {
     isInExitMenu = false;
-    paused = false;
     lostWindowFocus = false;
     gameOver = false;
 
@@ -104,7 +103,6 @@ void Game::Update(float dt)
 
     // Only run game logic if no menus are open and game is not paused
     bool running = (firstTimeGameStart == false && 
-                   paused == false && 
                    lostWindowFocus == false && 
                    !isInMainMenu && 
                    !isInOptionsMenu && 
@@ -456,18 +454,6 @@ void Game::UpdateUI()
     {
         lostWindowFocus = false;
     }
-
-    if (optionWindowRequested == false && lostWindowFocus == false && gameOver == false && IsKeyPressed(KEY_P))
-    {
-        paused = !paused;
-        if (paused) {
-            PauseMusicStream(backgroundMusic);
-            musicPlaying = false;
-        } else {
-            ResumeMusicStream(backgroundMusic);
-            musicPlaying = true;
-        }
-    }
 }
 
 void Game::Draw()
@@ -537,11 +523,6 @@ void Game::Draw()
     {
         DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
         DrawText("Are you sure you want to exit? (Y/N)", gameScreenWidth / 2 - 200, gameScreenHeight / 2 - 10, 20, WHITE);
-    }
-    else if (paused)
-    {
-        DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
-        DrawText("Game paused, press P to continue", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
     }
     else if (lostWindowFocus)
     {

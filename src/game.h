@@ -25,7 +25,6 @@ public:
 private:
     bool firstTimeGameStart = true;
     bool isInExitMenu;
-    bool paused = false;
     bool lostWindowFocus = false;
     bool gameOver;
     bool isInMainMenu = false;
