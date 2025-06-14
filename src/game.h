@@ -17,6 +17,8 @@ public:
 
     void Draw();
     void DrawUI();
+    void DrawMainMenu();
+    void DrawOptionsMenu();
     std::string FormatWithLeadingZeroes(int number, int width);
     void Randomize();
 

@@ -98,7 +98,6 @@ void Game::Update(float dt)
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
     UpdateUI();
 
-    // Update music
     if (isMusicPlaying) {
         UpdateMusicStream(backgroundMusic);
     }
@@ -135,10 +134,9 @@ void Game::HandleInput()
             ballX += ballSpeed * dt;
         }
 
-        // Play sound when spacebar is pressed
         if (IsKeyPressed(KEY_SPACE)) {
             if (actionSound.stream.buffer != NULL) {
-                StopSound(actionSound);  // Stop any previous playback
+                StopSound(actionSound);
                 PlaySound(actionSound);
             } 
         }
@@ -148,7 +146,6 @@ void Game::HandleInput()
         if(IsGestureDetected(GESTURE_DRAG) || IsGestureDetected(GESTURE_HOLD)) {
             // Get touch position in screen coordinates
             Vector2 touchPosition = GetTouchPosition(0);
-            
             // Convert screen coordinates to game coordinates
             float gameX = (touchPosition.x - (GetScreenWidth() - (gameScreenWidth * screenScale)) * 0.5f) / screenScale;
             float gameY = (touchPosition.y - (GetScreenHeight() - (gameScreenHeight * screenScale)) * 0.5f) / screenScale;
@@ -229,19 +226,18 @@ void Game::UpdateUI()
             // Close options menu and return to main menu
             isInOptionsMenu = false;
             isInMainMenu = true;
-            isMusicPlaying = false;  // Stop music when in menu
+            isMusicPlaying = false;
         }
         else if (!isInitialLaunch && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
         {
-            // Open main menu
             isInMainMenu = true;
-            isMusicPlaying = false;  // Stop music when in menu
+            isMusicPlaying = false;
         }
         else if (isInMainMenu && !isInitialLaunch)  // Allow ESC to close menu if not first time
         {
             // Close main menu and return to gameplay
             isInMainMenu = false;
-            isMusicPlaying = true;  // Resume music when returning to gameplay
+            isMusicPlaying = true;
             isInitialLaunch = false;
         }
     }
@@ -249,7 +245,7 @@ void Game::UpdateUI()
     // Handle main menu
     if (isInMainMenu)
     {
-        isMusicPlaying = false;  // Stop music when in menu
+        isMusicPlaying = false;
         // Track mouse movement for hover only
         static Vector2 lastMousePos = GetMousePosition();
         Vector2 currentMousePos = GetMousePosition();
@@ -263,11 +259,11 @@ void Game::UpdateUI()
             {
                 isInMainMenu = false;
                 isInitialLaunch = false;
-                isMusicPlaying = true;  // Start music when continuing
+                isMusicPlaying = true;
             }
             else if (currentMenuSelection == 1) // New Game
             {
-                Reset();  // This will set isInMainMenu to false and isMusicPlaying to true
+                Reset();
             }
             else if (currentMenuSelection == 2) // Options
             {
@@ -282,28 +278,16 @@ void Game::UpdateUI()
         }
         else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
-            if (isInitialLaunch && currentMenuSelection == 1)  // If on New Game and first time
-            {
-                currentMenuSelection = 3;  // Skip Continue, go to Quit
-            }
-            else
-            {
-                do {
-                    currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
-                } while (isInitialLaunch && currentMenuSelection == 0);  // Skip Continue on first time
+            currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+            if(isInitialLaunch && currentMenuSelection == 0) {
+                currentMenuSelection = 3;
             }
         }
         else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
-            if (isInitialLaunch && currentMenuSelection == 3)  // If on Quit and first time
-            {
-                currentMenuSelection = 1;  // Skip Continue, go to New Game
-            }
-            else
-            {
-                do {
-                    currentMenuSelection = (currentMenuSelection + 1) % 4;
-                } while (isInitialLaunch && currentMenuSelection == 0);  // Skip Continue on first time
+            currentMenuSelection = (currentMenuSelection + 1) % 4;
+            if(isInitialLaunch && currentMenuSelection == 0) {
+                currentMenuSelection = 1;
             }
         }
 
@@ -342,12 +326,12 @@ void Game::UpdateUI()
                 {
                     isInMainMenu = false;
                     isInitialLaunch = false;
-                    isMusicPlaying = true;  // Start music when continuing
+                    isMusicPlaying = true;
                 }
                 else if (i == 1) // New Game
                 {
                     isInMainMenu = false;
-                    Reset();  // This will set isMusicPlaying to true
+                    Reset();
                 }
                 else if (i == 2) // Options
                 {
@@ -521,86 +505,15 @@ void Game::UpdateUI()
     }
 }
 
-void Game::Draw()
+void Game::DrawUI()
 {
-    // Render everything to the texture
-    BeginTextureMode(targetRenderTex);
-    ClearBackground(GRAY);
-    DrawCircle(ballX, ballY, ballRadius, ballColor);
-    DrawFPS(10, 10);
-
     if (isInMainMenu)
     {
-        const int menuStartY = gameScreenHeight / 2 - 100;
-        const int menuStartX = gameScreenWidth / 2 - 150;
-        const int menuItemHeight = 50;
-
-        // Draw menu background
-        DrawRectangle(menuStartX - 10, menuStartY - 10, 320, 220, {0, 0, 0, 200});
-
-        // Draw menu items
-        const char* menuItems[] = {"Continue", "New Game", "Options", "Quit Game"};
-        for (int i = 0; i < 4; i++)
-        {
-            Color textColor;
-            if (i == currentMenuSelection)
-            {
-                textColor = YELLOW;
-            }
-            else if (i == 0 && isInitialLaunch)  // Gray out Continue on first start
-            {
-                textColor = DARKGRAY;
-            }
-            else
-            {
-                textColor = WHITE;
-            }
-            DrawText(menuItems[i], menuStartX, menuStartY + i * menuItemHeight, 20, textColor);
-        }
+        DrawMainMenu();
     }
     else if (isInOptionsMenu)
     {
-        const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
-        const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
-        const int menuItemHeight = 60;                      // More vertical space
-        const int sliderWidth = 250;                        // Wider sliders
-        const int sliderHeight = 20;
-        const int menuWidth = 500;                          // Increased width by 50 pixels
-        const int menuHeight = 280;                         
-
-        // Draw menu background
-        DrawRectangle(menuStartX - 10, menuStartY - 10, menuWidth, menuHeight, {0, 0, 0, 200});
-
-        // Draw menu title
-        DrawText("Options", menuStartX, menuStartY, 20, WHITE);
-
-        // Draw sound volume slider
-        DrawText("Sound Volume", menuStartX, menuStartY + menuItemHeight, 20, 
-                (optionsMenuSelection == 0) ? YELLOW : WHITE);
-        DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, sliderWidth, sliderHeight, GRAY);
-        DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, 
-                    sliderWidth * soundVolume, sliderHeight, 
-                    (optionsMenuSelection == 0) ? YELLOW : WHITE);
-        // Draw sound volume percentage
-        char soundVolText[32];
-        sprintf(soundVolText, "%d%%", (int)(soundVolume * 100));
-        DrawText(soundVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight, 20, WHITE);
-
-        // Draw music volume slider
-        DrawText("Music Volume", menuStartX, menuStartY + menuItemHeight * 2, 20, 
-                (optionsMenuSelection == 1) ? YELLOW : WHITE);
-        DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, sliderWidth, sliderHeight, GRAY);
-        DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, 
-                    sliderWidth * musicVolume, sliderHeight, 
-                    (optionsMenuSelection == 1) ? YELLOW : WHITE);
-        // Draw music volume percentage
-        char musicVolText[32];
-        sprintf(musicVolText, "%d%%", (int)(musicVolume * 100));
-        DrawText(musicVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight * 2, 20, WHITE);
-
-        // Draw back button
-        DrawText("Back", menuStartX, menuStartY + menuItemHeight * 3, 20, 
-                (optionsMenuSelection == 2) ? YELLOW : WHITE);
+        DrawOptionsMenu();
     }
     else if (isInExitConfirmation)
     {
@@ -617,6 +530,94 @@ void Game::Draw()
         DrawRectangleRounded({(float)(gameScreenWidth / 2 - 250), (float)(gameScreenHeight / 2 - 30), 500.0f, 60.0f}, 0.76f, 20, BLACK);
         DrawText("Game over, press Enter to play again", gameScreenWidth / 2 - 200, gameScreenHeight / 2, 20, YELLOW);
     }
+}
+
+void Game::DrawMainMenu()
+{
+    const int menuStartY = gameScreenHeight / 2 - 100;
+    const int menuStartX = gameScreenWidth / 2 - 150;
+    const int menuItemHeight = 50;
+
+    // Draw menu background
+    DrawRectangle(menuStartX - 10, menuStartY - 10, 320, 220, {0, 0, 0, 200});
+
+    // Draw menu items
+    const char* menuItems[] = {"Continue", "New Game", "Options", "Quit Game"};
+    for (int i = 0; i < 4; i++)
+    {
+        Color textColor;
+        if (i == currentMenuSelection)
+        {
+            textColor = YELLOW;
+        }
+        else if (i == 0 && isInitialLaunch)  // Gray out Continue on first start
+        {
+            textColor = DARKGRAY;
+        }
+        else
+        {
+            textColor = WHITE;
+        }
+        DrawText(menuItems[i], menuStartX, menuStartY + i * menuItemHeight, 20, textColor);
+    }  
+}
+
+void Game::DrawOptionsMenu()
+{
+    const int menuStartY = gameScreenHeight / 2 - 120;  // Moved up slightly
+    const int menuStartX = gameScreenWidth / 2 - 200;   // Wider menu
+    const int menuItemHeight = 60;                      // More vertical space
+    const int sliderWidth = 250;                        // Wider sliders
+    const int sliderHeight = 20;
+    const int menuWidth = 500;                          // Increased width by 50 pixels
+    const int menuHeight = 280;                         
+
+    // Draw menu background
+    DrawRectangle(menuStartX - 10, menuStartY - 10, menuWidth, menuHeight, {0, 0, 0, 200});
+
+    // Draw menu title
+    DrawText("Options", menuStartX, menuStartY, 20, WHITE);
+
+    // Draw sound volume slider
+    DrawText("Sound Volume", menuStartX, menuStartY + menuItemHeight, 20, 
+            (optionsMenuSelection == 0) ? YELLOW : WHITE);
+    DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, sliderWidth, sliderHeight, GRAY);
+    DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, 
+                sliderWidth * soundVolume, sliderHeight, 
+                (optionsMenuSelection == 0) ? YELLOW : WHITE);
+    // Draw sound volume percentage
+    char soundVolText[32];
+    sprintf(soundVolText, "%d%%", (int)(soundVolume * 100));
+    DrawText(soundVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight, 20, WHITE);
+
+    // Draw music volume slider
+    DrawText("Music Volume", menuStartX, menuStartY + menuItemHeight * 2, 20, 
+            (optionsMenuSelection == 1) ? YELLOW : WHITE);
+    DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, sliderWidth, sliderHeight, GRAY);
+    DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight * 2, 
+                sliderWidth * musicVolume, sliderHeight, 
+                (optionsMenuSelection == 1) ? YELLOW : WHITE);
+    // Draw music volume percentage
+    char musicVolText[32];
+    sprintf(musicVolText, "%d%%", (int)(musicVolume * 100));
+    DrawText(musicVolText, menuStartX + 150 + sliderWidth + 20, menuStartY + menuItemHeight * 2, 20, WHITE);
+
+    // Draw back button
+    DrawText("Back", menuStartX, menuStartY + menuItemHeight * 3, 20, 
+            (optionsMenuSelection == 2) ? YELLOW : WHITE);
+}
+
+void Game::Draw()
+{
+    // Render everything to the texture
+    BeginTextureMode(targetRenderTex);
+    ClearBackground(GRAY);
+    DrawCircle(ballX, ballY, ballRadius, ballColor);
+    DrawFPS(10, 10);
+
+    DrawUI();
+
+
     EndTextureMode();
 
     // Draw the texture to the screen
