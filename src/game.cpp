@@ -71,13 +71,20 @@ void Game::InitGame()
     isInExitMenu = false;
     lostWindowFocus = false;
     gameOver = false;
+    isInMainMenu = true;  // Show main menu only on first start
+    firstTimeGameStart = true;  // Set first time flag
 
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 }
 
 void Game::Reset()
 {
-    InitGame();
+    isInExitMenu = false;
+    lostWindowFocus = false;
+    gameOver = false;
+    isInMainMenu = false;  // Don't show menu on reset
+    firstTimeGameStart = false;  // Not first time anymore
+
     ballX = width / 2;
     ballY = height / 2;
 }
@@ -165,49 +172,6 @@ void Game::HandleInput()
 
 void Game::UpdateUI()
 {
-    // Handle first-time game start
-    if (firstTimeGameStart)
-    {
-        if (isMobile)
-        {
-            if (IsGestureDetected(GESTURE_TAP))
-            {
-                firstTimeGameStart = false;
-                if (!musicPlaying)
-                {
-                    PlayMusicStream(backgroundMusic);
-                    if (IsMusicStreamPlaying(backgroundMusic))
-                    {
-                        TraceLog(LOG_INFO, "Music started playing");
-                        musicPlaying = true;
-                    }
-                    else
-                    {
-                        TraceLog(LOG_ERROR, "Failed to start music playback");
-                    }
-                }
-            }
-        }
-        else if (IsKeyDown(KEY_ENTER))
-        {
-            firstTimeGameStart = false;
-            if (!musicPlaying)
-            {
-                PlayMusicStream(backgroundMusic);
-                if (IsMusicStreamPlaying(backgroundMusic))
-                {
-                    TraceLog(LOG_INFO, "Music started playing");
-                    musicPlaying = true;
-                }
-                else
-                {
-                    TraceLog(LOG_ERROR, "Failed to start music playback");
-                }
-            }
-        }
-        return;
-    }
-
     // Handle ESC key for menu toggling
     if (IsKeyPressed(KEY_ESCAPE))
     {
@@ -217,7 +181,7 @@ void Game::UpdateUI()
             isInOptionsMenu = false;
             isInMainMenu = false;
         }
-        else
+        else if (!firstTimeGameStart)  // Only allow ESC to toggle menu if not first time
         {
             // Toggle main menu
             isInMainMenu = !isInMainMenu;
@@ -246,11 +210,27 @@ void Game::UpdateUI()
             if (currentMenuSelection == 0) // Continue
             {
                 isInMainMenu = false;
+                firstTimeGameStart = false;
+                if (!musicPlaying)
+                {
+                    PlayMusicStream(backgroundMusic);
+                    if (IsMusicStreamPlaying(backgroundMusic))
+                    {
+                        musicPlaying = true;
+                    }
+                }
             }
             else if (currentMenuSelection == 1) // New Game
             {
-                isInMainMenu = false;
-                Reset();
+                Reset();  // This will set isInMainMenu to false
+                if (!musicPlaying)
+                {
+                    PlayMusicStream(backgroundMusic);
+                    if (IsMusicStreamPlaying(backgroundMusic))
+                    {
+                        musicPlaying = true;
+                    }
+                }
             }
             else if (currentMenuSelection == 2) // Options
             {
@@ -456,11 +436,7 @@ void Game::Draw()
     DrawCircle(ballX, ballY, ballRadius, ballColor);
     DrawFPS(10, 10);
 
-    if (firstTimeGameStart)
-    {
-        DrawText("Press ENTER to start", gameScreenWidth / 2 - 100, gameScreenHeight / 2, 20, BLACK);
-    }
-    else if (isInMainMenu)
+    if (isInMainMenu)
     {
         const int menuStartY = gameScreenHeight / 2 - 100;
         const int menuStartX = gameScreenWidth / 2 - 150;
