@@ -110,11 +110,11 @@ void Game::Update(float dt)
     }
 
     // Only run game logic if no menus are open and game is not paused
-    bool running = (firstTimeGameStart == false && 
-                   lostWindowFocus == false && 
+    bool running = (!lostWindowFocus && 
                    !isInMainMenu && 
                    !isInOptionsMenu && 
-                   gameOver == false);
+                   !isInExitConfirmation && 
+                   !gameOver);
 
     if (running)
     {
@@ -177,23 +177,18 @@ void Game::HandleInput()
 
 void Game::UpdateUI()
 {
-    // Handle ESC key for menu toggling
-    if (IsKeyPressed(KEY_ESCAPE))
+    // Handle window focus first
+    if (IsWindowFocused() == false)
     {
-        if (isInOptionsMenu)
-        {
-            // Close all menus and return to gameplay
-            isInOptionsMenu = false;
-            isInMainMenu = false;
-        }
-        else if (!firstTimeGameStart)  // Only allow ESC to toggle menu if not first time
-        {
-            // Toggle main menu
-            isInMainMenu = !isInMainMenu;
-        }
+        lostWindowFocus = true;
+        return;  // Skip other UI updates when window loses focus
+    }
+    else
+    {
+        lostWindowFocus = false;
     }
 
-    // Handle exit confirmation dialog
+    // Handle exit confirmation dialog first
     if (isInExitConfirmation)
     {
         if (IsKeyPressed(KEY_Y))
@@ -203,13 +198,36 @@ void Game::UpdateUI()
         else if (IsKeyPressed(KEY_N))
         {
             isInExitConfirmation = false;
+            isInMainMenu = true;  // Return to main menu after canceling exit
         }
         return;  // Skip other UI updates while in exit confirmation
+    }
+
+    // Handle ESC key for menu toggling
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        if (isInOptionsMenu)
+        {
+            // Close options menu and return to main menu
+            isInOptionsMenu = false;
+            isInMainMenu = true;
+        }
+        else if (!firstTimeGameStart && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
+        {
+            // Open main menu
+            isInMainMenu = true;
+        }
+        else if (isInMainMenu && !firstTimeGameStart)  // Allow ESC to close menu if not first time
+        {
+            // Close main menu and return to gameplay
+            isInMainMenu = false;
+        }
     }
 
     // Handle main menu
     if (isInMainMenu)
     {
+        // Handle keyboard navigation
         if (IsKeyPressed(KEY_ENTER))
         {
             if (currentMenuSelection == 0) // Continue
@@ -225,7 +243,6 @@ void Game::UpdateUI()
             {
                 isInMainMenu = false;
                 isInOptionsMenu = true;
-                // No need to read volumes as we maintain them ourselves
             }
             else if (currentMenuSelection == 3) // Quit
             {
@@ -241,7 +258,9 @@ void Game::UpdateUI()
             }
             else
             {
-                currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+                do {
+                    currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+                } while (firstTimeGameStart && currentMenuSelection == 0);  // Skip Continue on first time
             }
         }
         else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
@@ -252,7 +271,9 @@ void Game::UpdateUI()
             }
             else
             {
-                currentMenuSelection = (currentMenuSelection + 1) % 4;
+                do {
+                    currentMenuSelection = (currentMenuSelection + 1) % 4;
+                } while (firstTimeGameStart && currentMenuSelection == 0);  // Skip Continue on first time
             }
         }
 
@@ -285,6 +306,7 @@ void Game::UpdateUI()
                     if (i == 0) // Continue
                     {
                         isInMainMenu = false;
+                        firstTimeGameStart = false;
                     }
                     else if (i == 1) // New Game
                     {
@@ -435,15 +457,6 @@ void Game::UpdateUI()
             musicVolume = fmaxf(0.0f, fminf(1.0f, musicVolume));
             SetMusicVolume(backgroundMusic, musicVolume);
         }
-    }
-
-    if (IsWindowFocused() == false)
-    {
-        lostWindowFocus = true;
-    }
-    else
-    {
-        lostWindowFocus = false;
     }
 }
 
