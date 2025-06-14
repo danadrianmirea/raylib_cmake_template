@@ -73,7 +73,7 @@ void Game::InitGame()
     gameOver = false;
     isInMainMenu = true;  // Show main menu only on first start
     firstTimeGameStart = true;  // Set first time flag
-
+    currentMenuSelection = 1;  // Select New Game by default
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 }
 
@@ -245,11 +245,25 @@ void Game::UpdateUI()
         }
         else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
         {
-            currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+            if (firstTimeGameStart && currentMenuSelection == 1)  // If on New Game and first time
+            {
+                currentMenuSelection = 3;  // Skip Continue, go to Quit
+            }
+            else
+            {
+                currentMenuSelection = (currentMenuSelection - 1 + 4) % 4;
+            }
         }
         else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
         {
-            currentMenuSelection = (currentMenuSelection + 1) % 4;
+            if (firstTimeGameStart && currentMenuSelection == 3)  // If on Quit and first time
+            {
+                currentMenuSelection = 1;  // Skip Continue, go to New Game
+            }
+            else
+            {
+                currentMenuSelection = (currentMenuSelection + 1) % 4;
+            }
         }
 
         // Handle mouse interaction for main menu
@@ -264,6 +278,8 @@ void Game::UpdateUI()
         // Check menu item hover and click
         for (int i = 0; i < 4; i++)
         {
+            if (firstTimeGameStart && i == 0) continue;  // Skip Continue option on first time
+
             Rectangle menuItemRect = {
                 (float)menuStartX,
                 (float)(menuStartY + i * menuItemHeight),
@@ -449,7 +465,19 @@ void Game::Draw()
         const char* menuItems[] = {"Continue", "New Game", "Options", "Quit Game"};
         for (int i = 0; i < 4; i++)
         {
-            Color textColor = (i == currentMenuSelection) ? YELLOW : WHITE;
+            Color textColor;
+            if (i == currentMenuSelection)
+            {
+                textColor = YELLOW;
+            }
+            else if (i == 0 && firstTimeGameStart)  // Gray out Continue on first start
+            {
+                textColor = DARKGRAY;
+            }
+            else
+            {
+                textColor = WHITE;
+            }
             DrawText(menuItems[i], menuStartX, menuStartY + i * menuItemHeight, 20, textColor);
         }
     }
