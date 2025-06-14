@@ -59,6 +59,8 @@ void Game::InitGame()
 void Game::Reset()
 {
     InitGame();
+    ballX = width / 2;
+    ballY = height / 2;
 }
 
 void Game::Update(float dt)
@@ -193,6 +195,53 @@ void Game::UpdateUI()
         {
             optionWindowRequested = false;
             isInExitMenu = false;
+        }
+
+        // Handle mouse interaction
+        Vector2 mousePos = GetMousePosition();
+        // Convert screen coordinates to game coordinates
+        float gameX = (mousePos.x - (GetScreenWidth() - (gameScreenWidth * screenScale)) * 0.5f) / screenScale;
+        float gameY = (mousePos.y - (GetScreenHeight() - (gameScreenHeight * screenScale)) * 0.5f) / screenScale;
+
+        // Menu item dimensions
+        const int menuItemHeight = 40;
+        const int menuStartY = gameScreenHeight / 2 - 80;
+        const int menuStartX = gameScreenWidth / 2 - 100;
+        const int menuItemWidth = 200;
+
+        // Check if mouse is over any menu item
+        for (int i = 0; i < 4; i++) {
+            Rectangle menuItemRect = {
+                (float)menuStartX,
+                (float)(menuStartY + (i * menuItemHeight)),
+                (float)menuItemWidth,
+                (float)menuItemHeight
+            };
+
+            if (CheckCollisionPointRec({gameX, gameY}, menuItemRect)) {
+                currentMenuSelection = i;
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    // Handle menu selection based on current selection
+                    switch (currentMenuSelection) {
+                        case 0: // Continue
+                            optionWindowRequested = false;
+                            isInExitMenu = false;
+                            break;
+                        case 1: // New game
+                            Reset();
+                            optionWindowRequested = false;
+                            isInExitMenu = false;
+                            break;
+                        case 2: // Options
+                            // TODO: Implement options menu
+                            break;
+                        case 3: // Quit game
+                            exitWindow = true;
+                            break;
+                    }
+                }
+                break;
+            }
         }
     }
 
