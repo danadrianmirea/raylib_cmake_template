@@ -14,6 +14,7 @@ public:
     void Update(float dt);
     void HandleInput();
     void UpdateUI();
+    void UpdateMenu();
 
     void Draw();
     void DrawUI();

@@ -165,83 +165,8 @@ void Game::HandleInput()
     }
 }
 
-void Game::UpdateUI()
+void Game::UpdateMenu()
 {
-    // Handle window close button (X)
-    if (WindowShouldClose() && !isInExitConfirmation)
-    {
-        isInExitConfirmation = true;
-        isInMainMenu = false;
-        isInOptionsMenu = false;
-        isMusicPlaying = false;
-        return;
-    }
-
-    // Handle window focus first
-    if (IsWindowFocused() == false)
-    {
-        lostWindowFocus = true;
-        isMusicPlaying = false;
-        return;
-    }
-    else
-    {
-        lostWindowFocus = false;
-        isMusicPlaying = true;
-    }
-
-    // Handle exit confirmation dialog first
-    if (isInExitConfirmation)
-    {
-        if(isMusicPlaying) 
-        {
-            isMusicPlaying = false;
-        }
-
-        if(isInitialLaunch)
-        {
-            isInitialLaunch = false;
-        }
-
-        if (IsKeyPressed(KEY_Y))
-        {
-            exitWindow = true;
-        }
-        else if (IsKeyPressed(KEY_N))
-        {
-            isInExitConfirmation = false;
-            isInMainMenu = false;
-            isInOptionsMenu = false;
-            isMusicPlaying = true;
-        }
-        return;  // Skip other UI updates while in exit confirmation
-    }
-
-    // Handle ESC key for menu toggling
-    if (IsKeyPressed(KEY_ESCAPE))
-    {
-        if (isInOptionsMenu)
-        {
-            // Close options menu and return to main menu
-            isInOptionsMenu = false;
-            isInMainMenu = true;
-            isMusicPlaying = false;
-        }
-        else if (!isInitialLaunch && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
-        {
-            isInMainMenu = true;
-            isMusicPlaying = false;
-        }
-        else if (isInMainMenu && !isInitialLaunch)  // Allow ESC to close menu if not first time
-        {
-            // Close main menu and return to gameplay
-            isInMainMenu = false;
-            isMusicPlaying = true;
-            isInitialLaunch = false;
-        }
-    }
-
-    // Handle main menu
     if (isInMainMenu)
     {
         isMusicPlaying = false;
@@ -502,6 +427,84 @@ void Game::UpdateUI()
             SetMusicVolume(backgroundMusic, musicVolume);
         }
     }
+}
+
+void Game::UpdateUI()
+{
+    // Handle window close button (X)
+    if (WindowShouldClose() && !isInExitConfirmation)
+    {
+        isInExitConfirmation = true;
+        isInMainMenu = false;
+        isInOptionsMenu = false;
+        isMusicPlaying = false;
+        return;
+    }
+
+    // Handle window focus first
+    if (IsWindowFocused() == false)
+    {
+        lostWindowFocus = true;
+        isMusicPlaying = false;
+        return;
+    }
+    else
+    {
+        lostWindowFocus = false;
+        isMusicPlaying = true;
+    }
+
+    // Handle exit confirmation dialog first
+    if (isInExitConfirmation)
+    {
+        if(isMusicPlaying) 
+        {
+            isMusicPlaying = false;
+        }
+
+        if(isInitialLaunch)
+        {
+            isInitialLaunch = false;
+        }
+
+        if (IsKeyPressed(KEY_Y))
+        {
+            exitWindow = true;
+        }
+        else if (IsKeyPressed(KEY_N))
+        {
+            isInExitConfirmation = false;
+            isInMainMenu = false;
+            isInOptionsMenu = false;
+            isMusicPlaying = true;
+        }
+        return;  // Skip other UI updates while in exit confirmation
+    }
+
+    // Handle ESC key for menu toggling
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        if (isInOptionsMenu)
+        {
+            // Close options menu and return to main menu
+            isInOptionsMenu = false;
+            isInMainMenu = true;
+            isMusicPlaying = false;
+        }
+        else if (!isInitialLaunch && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
+        {
+            isInMainMenu = true;
+            isMusicPlaying = false;
+        }
+        else if (isInMainMenu && !isInitialLaunch)  // Allow ESC to close menu if not first time
+        {
+            // Close main menu and return to gameplay
+            isInMainMenu = false;
+            isMusicPlaying = true;
+            isInitialLaunch = false;
+        }
+    }
+    UpdateMenu();
 }
 
 void Game::DrawUI()
