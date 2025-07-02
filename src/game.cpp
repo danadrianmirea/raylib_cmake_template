@@ -285,48 +285,168 @@ void Game::UpdateMenu()
             {
                 isInOptionsMenu = false;
                 isInMainMenu = true;
+                // Reset key repeat timers when leaving options menu
+                leftKeyPressed = false;
+                rightKeyPressed = false;
+                upKeyPressed = false;
+                downKeyPressed = false;
+                leftKeyTimer = 0.0f;
+                rightKeyTimer = 0.0f;
+                upKeyTimer = 0.0f;
+                downKeyTimer = 0.0f;
             }
         }
-        else if (IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W))
-        {
-            optionsMenuSelection = (optionsMenuSelection - 1 + 3) % 3;
-        }
-        else if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S))
-        {
-            optionsMenuSelection = (optionsMenuSelection + 1) % 3;
-        }
-        else if (optionsMenuSelection == 0) // Sound Volume
-        {
-            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A))
-            {
-                soundVolume = fmaxf(0.0f, soundVolume - 0.05f);
-                SetSoundVolume(actionSound, soundVolume);
-                if (actionSound.stream.buffer != NULL) {
-                    StopSound(actionSound);
-                    PlaySound(actionSound);
+        // Handle key repeat for options menu navigation and volume adjustment
+        float dt = GetFrameTime();
+        
+        // Handle UP/DOWN navigation with auto-repeat
+        bool upPressed = IsKeyDown(KEY_UP) || IsKeyDown(KEY_W);
+        bool downPressed = IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S);
+        
+        if (upPressed) {
+            if (!upKeyPressed) {
+                // First press
+                optionsMenuSelection = (optionsMenuSelection - 1 + 3) % 3;
+                upKeyPressed = true;
+                upKeyTimer = 0.0f;
+            } else {
+                // Auto-repeat
+                upKeyTimer += dt;
+                if (upKeyTimer >= keyRepeatDelay) {
+                    upKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                    optionsMenuSelection = (optionsMenuSelection - 1 + 3) % 3;
                 }
             }
-            else if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
-            {
-                soundVolume = fminf(1.0f, soundVolume + 0.05f);
-                SetSoundVolume(actionSound, soundVolume);
-                if (actionSound.stream.buffer != NULL) {
-                    StopSound(actionSound);
-                    PlaySound(actionSound);
+        } else {
+            upKeyPressed = false;
+            upKeyTimer = 0.0f;
+        }
+        
+        if (downPressed) {
+            if (!downKeyPressed) {
+                // First press
+                optionsMenuSelection = (optionsMenuSelection + 1) % 3;
+                downKeyPressed = true;
+                downKeyTimer = 0.0f;
+            } else {
+                // Auto-repeat
+                downKeyTimer += dt;
+                if (downKeyTimer >= keyRepeatDelay) {
+                    downKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                    optionsMenuSelection = (optionsMenuSelection + 1) % 3;
                 }
+            }
+        } else {
+            downKeyPressed = false;
+            downKeyTimer = 0.0f;
+        }
+        
+        // Handle LEFT/RIGHT volume adjustment with auto-repeat
+        bool leftPressed = IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A);
+        bool rightPressed = IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D);
+        
+        if (optionsMenuSelection == 0) // Sound Volume
+        {
+            if (leftPressed) {
+                if (!leftKeyPressed) {
+                    // First press
+                    soundVolume = fmaxf(0.0f, soundVolume - 0.05f);
+                    SetSoundVolume(actionSound, soundVolume);
+                    if (actionSound.stream.buffer != NULL) {
+                        StopSound(actionSound);
+                        PlaySound(actionSound);
+                    }
+                    leftKeyPressed = true;
+                    leftKeyTimer = 0.0f;
+                } else {
+                    // Auto-repeat
+                    leftKeyTimer += dt;
+                    if (leftKeyTimer >= keyRepeatDelay) {
+                        leftKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                        soundVolume = fmaxf(0.0f, soundVolume - 0.05f);
+                        SetSoundVolume(actionSound, soundVolume);
+                        if (actionSound.stream.buffer != NULL) {
+                            StopSound(actionSound);
+                            PlaySound(actionSound);
+                        }
+                    }
+                }
+            } else {
+                leftKeyPressed = false;
+                leftKeyTimer = 0.0f;
+            }
+            
+            if (rightPressed) {
+                if (!rightKeyPressed) {
+                    // First press
+                    soundVolume = fminf(1.0f, soundVolume + 0.05f);
+                    SetSoundVolume(actionSound, soundVolume);
+                    if (actionSound.stream.buffer != NULL) {
+                        StopSound(actionSound);
+                        PlaySound(actionSound);
+                    }
+                    rightKeyPressed = true;
+                    rightKeyTimer = 0.0f;
+                } else {
+                    // Auto-repeat
+                    rightKeyTimer += dt;
+                    if (rightKeyTimer >= keyRepeatDelay) {
+                        rightKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                        soundVolume = fminf(1.0f, soundVolume + 0.05f);
+                        SetSoundVolume(actionSound, soundVolume);
+                        if (actionSound.stream.buffer != NULL) {
+                            StopSound(actionSound);
+                            PlaySound(actionSound);
+                        }
+                    }
+                }
+            } else {
+                rightKeyPressed = false;
+                rightKeyTimer = 0.0f;
             }
         }
         else if (optionsMenuSelection == 1) // Music Volume
         {
-            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A))
-            {
-                musicVolume = fmaxf(0.0f, musicVolume - 0.05f);
-                SetMusicVolume(backgroundMusic, musicVolume);
+            if (leftPressed) {
+                if (!leftKeyPressed) {
+                    // First press
+                    musicVolume = fmaxf(0.0f, musicVolume - 0.05f);
+                    SetMusicVolume(backgroundMusic, musicVolume);
+                    leftKeyPressed = true;
+                    leftKeyTimer = 0.0f;
+                } else {
+                    // Auto-repeat
+                    leftKeyTimer += dt;
+                    if (leftKeyTimer >= keyRepeatDelay) {
+                        leftKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                        musicVolume = fmaxf(0.0f, musicVolume - 0.05f);
+                        SetMusicVolume(backgroundMusic, musicVolume);
+                    }
+                }
+            } else {
+                leftKeyPressed = false;
+                leftKeyTimer = 0.0f;
             }
-            else if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D))
-            {
-                musicVolume = fminf(1.0f, musicVolume + 0.05f);
-                SetMusicVolume(backgroundMusic, musicVolume);
+            
+            if (rightPressed) {
+                if (!rightKeyPressed) {
+                    // First press
+                    musicVolume = fminf(1.0f, musicVolume + 0.05f);
+                    SetMusicVolume(backgroundMusic, musicVolume);
+                    rightKeyPressed = true;
+                    rightKeyTimer = 0.0f;
+                } else {
+                    // Auto-repeat
+                    rightKeyTimer += dt;
+                    if (rightKeyTimer >= keyRepeatDelay) {
+                        rightKeyTimer = keyRepeatDelay - keyRepeatInterval;
+                        musicVolume = fminf(1.0f, musicVolume + 0.05f);
+                        SetMusicVolume(backgroundMusic, musicVolume);
+                    }
+                }
+            } else {
+                rightKeyPressed = false;
+                rightKeyTimer = 0.0f;
             }
         }
 
@@ -407,6 +527,15 @@ void Game::UpdateMenu()
         if (CheckCollisionPointRec({gameX, gameY}, backButtonRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             isInOptionsMenu = false;
             isInMainMenu = true;
+            // Reset key repeat timers when leaving options menu
+            leftKeyPressed = false;
+            rightKeyPressed = false;
+            upKeyPressed = false;
+            downKeyPressed = false;
+            leftKeyTimer = 0.0f;
+            rightKeyTimer = 0.0f;
+            upKeyTimer = 0.0f;
+            downKeyTimer = 0.0f;
         }
 
         if (isDraggingSoundSlider) {
@@ -490,6 +619,15 @@ void Game::UpdateUI()
             isInOptionsMenu = false;
             isInMainMenu = true;
             isMusicPlaying = false;
+            // Reset key repeat timers when leaving options menu
+            leftKeyPressed = false;
+            rightKeyPressed = false;
+            upKeyPressed = false;
+            downKeyPressed = false;
+            leftKeyTimer = 0.0f;
+            rightKeyTimer = 0.0f;
+            upKeyTimer = 0.0f;
+            downKeyTimer = 0.0f;
         }
         else if (!isInitialLaunch && !isInMainMenu)  // Only allow ESC to open menu if not first time and not already in menu
         {

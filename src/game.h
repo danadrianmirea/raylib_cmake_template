@@ -41,6 +41,18 @@ private:
     bool isInExitConfirmation = false;
     bool isMusicPlaying = false;
 
+    // Key repeat variables for options menu
+    float keyRepeatDelay = 0.2f;  // Initial delay before repeat starts
+    float keyRepeatInterval = 0.03f;  // Interval between repeats
+    float leftKeyTimer = 0.0f;
+    float rightKeyTimer = 0.0f;
+    float upKeyTimer = 0.0f;
+    float downKeyTimer = 0.0f;
+    bool leftKeyPressed = false;
+    bool rightKeyPressed = false;
+    bool upKeyPressed = false;
+    bool downKeyPressed = false;
+
     float screenScale;
     RenderTexture2D targetRenderTex;
     Font font;
