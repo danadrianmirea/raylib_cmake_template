@@ -18,7 +18,7 @@ void mainLoop()
 int main()
 {
     InitWindow(gameScreenWidth, gameScreenHeight, "Game Template");
-    InitAudioDevice();  // Initialize audio device
+    InitAudioDevice();
 #ifndef EMSCRIPTEN_BUILD
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 #endif
@@ -39,7 +39,7 @@ int main()
         mainLoop();
     }
     delete game;
-    CloseAudioDevice();  // Close audio device
+    CloseAudioDevice();
     CloseWindow();
 #endif
 

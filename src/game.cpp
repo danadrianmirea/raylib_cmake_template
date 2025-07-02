@@ -69,7 +69,7 @@ void Game::InitGame()
     gameOver = false;
     isInMainMenu = true;
     isInitialLaunch = true;
-    currentMenuSelection = 1; // on first game start, select new game, continue is not available
+    currentMenuSelection = 1; // on first game start continue is not available
     screenScale = MIN((float)GetScreenWidth() / gameScreenWidth, (float)GetScreenHeight() / gameScreenHeight);
 
     PlayMusicStream(backgroundMusic);
@@ -118,7 +118,7 @@ void Game::HandleInput()
 {
     float dt = GetFrameTime();
 
-    if(!isMobile) { // desktop and web controls
+    if(!isMobile) {
         if(IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) {
             ballY -= ballSpeed * dt;
         }
@@ -143,7 +143,6 @@ void Game::HandleInput()
     else // mobile controls
     {
         if(IsGestureDetected(GESTURE_DRAG) || IsGestureDetected(GESTURE_HOLD)) {
-            // Get touch position in screen coordinates
             Vector2 touchPosition = GetTouchPosition(0);
             // Convert screen coordinates to game coordinates
             float gameX = (touchPosition.x - (GetScreenWidth() - (gameScreenWidth * screenScale)) * 0.5f) / screenScale;
@@ -227,7 +226,7 @@ void Game::UpdateMenu()
         // Check menu item hover and click
         for (int i = 0; i < 4; i++)
         {
-            if (isInitialLaunch && i == 0) continue;  // Skip Continue option on first time
+            if (isInitialLaunch && i == 0) continue;
 
             Rectangle menuItemRect = {
                 (float)menuStartX,
@@ -560,7 +559,6 @@ void Game::UpdateMenu()
 
 void Game::UpdateUI()
 {
-    // Handle window close button (X)
     if (WindowShouldClose() && !isInExitConfirmation)
     {
         isInExitConfirmation = true;
@@ -583,7 +581,7 @@ void Game::UpdateUI()
         isMusicPlaying = true;
     }
 
-    // Handle exit confirmation dialog first
+    // Handle exit confirmation dialog
     if (isInExitConfirmation)
     {
         if(isMusicPlaying) 
@@ -725,6 +723,7 @@ void Game::DrawOptionsMenu()
     DrawRectangle(menuStartX + 150, menuStartY + menuItemHeight, 
                 sliderWidth * soundVolume, sliderHeight, 
                 (optionsMenuSelection == 0) ? YELLOW : WHITE);
+                
     // Draw sound volume percentage
     char soundVolText[32];
     sprintf(soundVolText, "%d%%", (int)(soundVolume * 100));
